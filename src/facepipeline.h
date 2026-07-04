@@ -39,8 +39,19 @@ class FacePipeline : public QObject
     Q_PROPERTY(bool processing READ isProcessing NOTIFY processingChanged)
     Q_PROPERTY(int totalPhotos READ totalPhotos NOTIFY totalPhotosChanged)
     Q_PROPERTY(int processedPhotos READ processedPhotos NOTIFY processedPhotosChanged)
+    Q_PROPERTY(bool needsRescan READ needsRescan NOTIFY needsRescanChanged)
 
 public:
+    // Bump when embedding computation changes (alignment, preprocessing...);
+    // stored embeddings are then incompatible and a full re-scan is forced
+    static constexpr int EMBEDDING_VERSION = 2;
+
+    // Thresholds on the rescaled similarity (cosine mapped from [-1,1] to [0,1]).
+    // Auto-assign must be stricter than interactive suggestions: a silent
+    // wrong match poisons the person prototype.
+    static constexpr float AUTO_MATCH_THRESHOLD = 0.75f;
+    static constexpr float GROUPING_THRESHOLD = 0.7f;
+
     explicit FacePipeline(QObject *parent = nullptr);
     ~FacePipeline();
 
@@ -57,10 +68,17 @@ public:
 
     /**
      * @brief Scan gallery and process photos
+     *
+     * Incremental by default: photos already processed are skipped. When
+     * forceRescan is true (or stored embeddings are outdated), existing
+     * faces are recomputed.
+     *
      * @param galleryPath Path to gallery (e.g., ~/Pictures)
      * @param recursive Scan subdirectories
+     * @param forceRescan Re-process photos already scanned
      */
-    Q_INVOKABLE void scanGallery(const QString &galleryPath, bool recursive = true);
+    Q_INVOKABLE void scanGallery(const QString &galleryPath, bool recursive = true,
+                                 bool forceRescan = false);
 
     /**
      * @brief Process a single photo
@@ -74,7 +92,7 @@ public:
      * @param similarityThreshold Threshold for grouping (default: 0.7)
      * @return Number of groups created
      */
-    Q_INVOKABLE int groupUnknownFaces(float similarityThreshold = 0.7f);
+    Q_INVOKABLE int groupUnknownFaces(float similarityThreshold = GROUPING_THRESHOLD);
 
     /**
      * @brief Identify a face as a person
@@ -125,10 +143,24 @@ public:
 
     /**
      * @brief Remove face from person (unassign)
+     *
+     * Records a rejection so auto-matching never reassigns this face to
+     * the same person.
+     *
      * @param faceId Face ID to remove from person
      * @return true if successful
      */
     Q_INVOKABLE bool removeFaceFromPerson(int faceId);
+
+    /**
+     * @brief Permanently ignore a face (false positive, stranger, low quality)
+     *
+     * Ignored faces no longer appear in the identify flow or clustering.
+     *
+     * @param faceId Face ID to ignore
+     * @return true if successful
+     */
+    Q_INVOKABLE bool ignoreFace(int faceId);
 
     /**
      * @brief Get database statistics
@@ -148,12 +180,14 @@ public:
     bool isProcessing() const { return m_processing; }
     int totalPhotos() const { return m_totalPhotos; }
     int processedPhotos() const { return m_processedPhotos; }
+    bool needsRescan() const { return m_needsRescan; }
 
 signals:
     void initializedChanged();
     void processingChanged();
     void totalPhotosChanged();
     void processedPhotosChanged();
+    void needsRescanChanged();
 
     void scanStarted(int totalPhotos);
     void scanProgress(int current, int total, const QString &currentFile);
@@ -172,6 +206,8 @@ private:
     bool m_initialized;
     bool m_processing;
     bool m_cancelRequested;
+    bool m_needsRescan;
+    bool m_currentScanIsForced;
     int m_totalPhotos;
     int m_processedPhotos;
     int m_totalFacesDetected;
@@ -186,15 +222,16 @@ private:
     // Helper: Load and validate image
     QImage loadImage(const QString &filePath);
 
-    // Helper: Extract face region from image
-    cv::Mat extractFaceRegion(const cv::Mat &image, const QRectF &bbox,
-                              const QVector<QPointF> &landmarks);
+    // Helper: Align face to the 112x112 ArcFace template using the 5
+    // detected landmarks; falls back to a bbox crop if landmarks are missing
+    cv::Mat alignFace(const cv::Mat &image, const FaceDetection &detection);
 
     // Helper: Process single photo (internal)
-    PhotoProcessingResult processPhotoInternal(const QString &photoPath);
+    PhotoProcessingResult processPhotoInternal(const QString &photoPath, bool reprocess = false);
 
     // Helper: Match face against database
-    FaceMatch matchFaceToDatabase(const FaceEmbedding &embedding, float threshold = 0.7f);
+    FaceMatch matchFaceToDatabase(const FaceEmbedding &embedding,
+                                  float threshold = AUTO_MATCH_THRESHOLD);
 };
 
 #endif // FACEPIPELINE_H

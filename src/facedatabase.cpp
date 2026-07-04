@@ -5,6 +5,7 @@
 #include <QVariant>
 #include <QDataStream>
 #include <QBuffer>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -38,6 +39,13 @@ bool FaceDatabase::open(const QString &dbPath)
 
     m_isOpen = true;
     qDebug() << "Database opened:" << dbPath;
+
+    // FK constraints are declared in the schema but SQLite only enforces
+    // them with this pragma; WAL avoids blocking readers during scans
+    QSqlQuery pragma(m_db);
+    pragma.exec("PRAGMA foreign_keys = ON");
+    pragma.exec("PRAGMA journal_mode = WAL");
+    pragma.exec("PRAGMA synchronous = NORMAL");
 
     return initializeSchema();
 }
@@ -85,6 +93,7 @@ bool FaceDatabase::initializeSchema()
             person_id INTEGER DEFAULT -1,
             similarity_score REAL DEFAULT 0.0,
             verified INTEGER DEFAULT 0,
+            ignored INTEGER DEFAULT 0,
             detected_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE
         )
@@ -96,6 +105,21 @@ bool FaceDatabase::initializeSchema()
     // Migrate existing database if needed (add new columns if they don't exist)
     query.exec("ALTER TABLE faces ADD COLUMN similarity_score REAL DEFAULT 0.0");
     query.exec("ALTER TABLE faces ADD COLUMN verified INTEGER DEFAULT 0");
+    query.exec("ALTER TABLE faces ADD COLUMN ignored INTEGER DEFAULT 0");
+
+    // Rejections: "this face is NOT this person", so auto-matching never
+    // reassigns a face the user explicitly removed from a person
+    if (!query.exec(R"(
+        CREATE TABLE IF NOT EXISTS negative_matches (
+            face_id INTEGER NOT NULL,
+            person_id INTEGER NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (face_id, person_id)
+        )
+    )")) {
+        emit error("Failed to create negative_matches table: " + query.lastError().text());
+        return false;
+    }
 
     // People table
     if (!query.exec(R"(
@@ -318,7 +342,7 @@ QVector<Face> FaceDatabase::getUnmappedFaces()
     QVector<Face> faces;
     QSqlQuery query(m_db);
 
-    if (query.exec("SELECT * FROM faces WHERE person_id = -1 ORDER BY detected_at DESC")) {
+    if (query.exec("SELECT * FROM faces WHERE person_id = -1 AND ignored = 0 ORDER BY detected_at DESC")) {
         while (query.next()) {
             Face face;
             face.id = query.value("id").toInt();
@@ -370,6 +394,67 @@ bool FaceDatabase::removeFaceFromPerson(int faceId)
     query.bindValue(":id", faceId);
 
     return query.exec();
+}
+
+bool FaceDatabase::setFaceIgnored(int faceId, bool ignored)
+{
+    QSqlQuery query(m_db);
+    query.prepare("UPDATE faces SET ignored = :ignored WHERE id = :id");
+    query.bindValue(":ignored", ignored ? 1 : 0);
+    query.bindValue(":id", faceId);
+
+    return query.exec();
+}
+
+bool FaceDatabase::addNegativeMatch(int faceId, int personId)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT OR IGNORE INTO negative_matches (face_id, person_id) VALUES (:face_id, :person_id)");
+    query.bindValue(":face_id", faceId);
+    query.bindValue(":person_id", personId);
+
+    return query.exec();
+}
+
+bool FaceDatabase::hasNegativeMatch(int faceId, int personId)
+{
+    QSqlQuery query(m_db);
+    query.prepare("SELECT 1 FROM negative_matches WHERE face_id = :face_id AND person_id = :person_id");
+    query.bindValue(":face_id", faceId);
+    query.bindValue(":person_id", personId);
+
+    return query.exec() && query.next();
+}
+
+bool FaceDatabase::deleteFacesForPhoto(int photoId)
+{
+    QSqlQuery cleanup(m_db);
+    cleanup.prepare(R"(
+        DELETE FROM negative_matches
+        WHERE face_id IN (SELECT id FROM faces WHERE photo_id = :photo_id)
+    )");
+    cleanup.bindValue(":photo_id", photoId);
+    cleanup.exec();
+
+    QSqlQuery query(m_db);
+    query.prepare("DELETE FROM faces WHERE photo_id = :photo_id");
+    query.bindValue(":photo_id", photoId);
+
+    return query.exec();
+}
+
+QSet<QString> FaceDatabase::getProcessedFilePaths()
+{
+    QSet<QString> paths;
+    QSqlQuery query(m_db);
+
+    if (query.exec("SELECT file_path FROM photos WHERE processed_at IS NOT NULL")) {
+        while (query.next()) {
+            paths.insert(query.value(0).toString());
+        }
+    }
+
+    return paths;
 }
 
 // === Person operations ===
@@ -471,6 +556,12 @@ bool FaceDatabase::deletePerson(int personId)
         return false;
     }
 
+    // Drop rejections referencing this person
+    QSqlQuery query3(m_db);
+    query3.prepare("DELETE FROM negative_matches WHERE person_id = :person_id");
+    query3.bindValue(":person_id", personId);
+    query3.exec();
+
     m_db.commit();
     return true;
 }
@@ -508,10 +599,23 @@ QVector<Face> FaceDatabase::getFacesForPerson(int personId)
 
 FaceEmbedding FaceDatabase::getAverageEmbedding(int personId)
 {
-    QVector<Face> faces = getFacesForPerson(personId);
+    QVector<Face> allFaces = getFacesForPerson(personId);
 
-    if (faces.isEmpty()) {
+    if (allFaces.isEmpty()) {
         return FaceEmbedding();
+    }
+
+    // Only user-verified faces define the person prototype; averaging in
+    // auto-matched faces lets one bad match drift the centroid and attract
+    // more bad matches. Fall back to all faces if nothing is verified yet.
+    QVector<Face> faces;
+    for (const Face &face : allFaces) {
+        if (face.verified) {
+            faces.append(face);
+        }
+    }
+    if (faces.isEmpty()) {
+        faces = allFaces;
     }
 
     // Calculate average embedding
@@ -582,7 +686,8 @@ bool FaceDatabase::deleteAllData()
 
     QSqlQuery query(m_db);
 
-    if (!query.exec("DELETE FROM faces") ||
+    if (!query.exec("DELETE FROM negative_matches") ||
+        !query.exec("DELETE FROM faces") ||
         !query.exec("DELETE FROM people") ||
         !query.exec("DELETE FROM photos")) {
         m_db.rollback();
@@ -590,7 +695,52 @@ bool FaceDatabase::deleteAllData()
     }
 
     m_db.commit();
+
+    // Reclaim space and purge deleted embeddings from free pages
+    query.exec("VACUUM");
     return true;
+}
+
+bool FaceDatabase::clearFaceData()
+{
+    m_db.transaction();
+
+    QSqlQuery query(m_db);
+
+    // Photos records are kept, but they must be re-processed
+    if (!query.exec("DELETE FROM negative_matches") ||
+        !query.exec("DELETE FROM faces") ||
+        !query.exec("DELETE FROM people") ||
+        !query.exec("UPDATE photos SET processed_at = NULL")) {
+        m_db.rollback();
+        return false;
+    }
+
+    m_db.commit();
+    return true;
+}
+
+QString FaceDatabase::getSetting(const QString &key, const QString &defaultValue)
+{
+    QSqlQuery query(m_db);
+    query.prepare("SELECT value FROM settings WHERE key = :key");
+    query.bindValue(":key", key);
+
+    if (query.exec() && query.next()) {
+        return query.value(0).toString();
+    }
+
+    return defaultValue;
+}
+
+bool FaceDatabase::setSetting(const QString &key, const QString &value)
+{
+    QSqlQuery query(m_db);
+    query.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (:key, :value)");
+    query.bindValue(":key", key);
+    query.bindValue(":value", value);
+
+    return query.exec();
 }
 
 QVariantMap FaceDatabase::getStatistics()
@@ -613,10 +763,12 @@ QVariantMap FaceDatabase::getStatistics()
         stats["total_people"] = query.value(0).toInt();
     }
 
-    if (query.exec("SELECT COUNT(*) FROM faces WHERE person_id = -1")) {
+    if (query.exec("SELECT COUNT(*) FROM faces WHERE person_id = -1 AND ignored = 0")) {
         query.next();
         stats["unmapped_faces"] = query.value(0).toInt();
     }
+
+    stats["db_size_bytes"] = QFileInfo(m_dbPath).size();
 
     return stats;
 }

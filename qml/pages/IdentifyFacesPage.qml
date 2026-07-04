@@ -18,8 +18,12 @@ Page {
         currentIndex = 0
     }
 
-    // Skip current face (ignore/false positive)
+    // Ignore current face permanently (not a face, stranger, low quality)
     function skipFace() {
+        if (currentIndex < currentFaces.length) {
+            facePipeline.ignoreFace(currentFaces[currentIndex].face_id)
+        }
+
         if (currentIndex < currentFaces.length - 1) {
             currentIndex++
         } else {
@@ -285,7 +289,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("✗ Skip (not a face or low quality)\n✓ Identify (assign to a person)")
+                text: qsTr("✗ Ignore (not a face or low quality, won't be shown again)\n✓ Identify (assign to a person)")
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryColor
                 horizontalAlignment: Text.AlignHCenter

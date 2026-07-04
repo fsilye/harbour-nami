@@ -231,37 +231,50 @@ FaceEmbedding FaceRecognizer::normalizeEmbedding(const FaceEmbedding &embedding)
 
 cv::Mat FaceRecognizer::qImageToCvMat(const QImage &image)
 {
+    // Same convention as FaceDetector::qImageToCvMat: BGR
     QImage rgb = image.convertToFormat(QImage::Format_RGB888);
-    cv::Mat mat(rgb.height(), rgb.width(), CV_8UC3,
-                const_cast<uchar*>(rgb.bits()), rgb.bytesPerLine());
-    return mat.clone();
+    cv::Mat rgbMat(rgb.height(), rgb.width(), CV_8UC3,
+                   const_cast<uchar*>(rgb.bits()), rgb.bytesPerLine());
+
+    cv::Mat bgr;
+    cv::cvtColor(rgbMat, bgr, cv::COLOR_RGB2BGR);
+    return bgr;
 }
 
 std::vector<float> FaceRecognizer::preprocessImage(const cv::Mat &faceImage)
 {
-    // Resize to 112x112
+    // Resize to 112x112 (no-op when the face is already aligned to 112x112)
     cv::Mat resized;
-    cv::resize(faceImage, resized, cv::Size(112, 112));
+    if (faceImage.cols != 112 || faceImage.rows != 112) {
+        cv::resize(faceImage, resized, cv::Size(112, 112));
+    } else {
+        resized = faceImage;
+    }
 
-    // Convert to RGB if needed
+    // Input mats are BGR (OpenCV convention); the model was trained on RGB
     cv::Mat rgb;
     if (resized.channels() == 3) {
         cv::cvtColor(resized, rgb, cv::COLOR_BGR2RGB);
     } else {
-        rgb = resized;
+        cv::cvtColor(resized, rgb, cv::COLOR_GRAY2RGB);
     }
 
     // ArcFace preprocessing: (pixel - 127.5) / 128.0
-    // Input format: NHWC [1, 112, 112, 3]
-    std::vector<float> inputTensor;
-    inputTensor.reserve(1 * 112 * 112 * 3);
+    // Tensor layout follows the model's input shape: NHWC [1,112,112,3]
+    // or NCHW [1,3,112,112]
+    bool nchw = (m_inputShape.size() == 4 && m_inputShape[1] == 3);
+
+    std::vector<float> inputTensor(1 * 112 * 112 * 3);
 
     for (int h = 0; h < 112; h++) {
         for (int w = 0; w < 112; w++) {
             cv::Vec3b pixel = rgb.at<cv::Vec3b>(h, w);
             for (int c = 0; c < 3; c++) {
                 float normalized = (static_cast<float>(pixel[c]) - 127.5f) / 128.0f;
-                inputTensor.push_back(normalized);
+                size_t index = nchw
+                    ? static_cast<size_t>(c) * 112 * 112 + static_cast<size_t>(h) * 112 + w
+                    : (static_cast<size_t>(h) * 112 + w) * 3 + c;
+                inputTensor[index] = normalized;
             }
         }
     }

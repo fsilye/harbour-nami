@@ -1,5 +1,7 @@
 #include "facedetector.h"
 #include <QDebug>
+#include <algorithm>
+#include <cmath>
 
 FaceDetector::FaceDetector(QObject *parent)
     : QObject(parent)
@@ -75,16 +77,32 @@ QVector<FaceDetection> FaceDetector::detect(const cv::Mat &image, float confiden
     qDebug() << "Confidence threshold:" << confidenceThreshold;
 
     try {
-        // YuNet requires fixed input size - resize all images to model input size
+        // Downscale with a uniform factor so faces are not distorted; YuNet
+        // supports arbitrary input sizes via setInputSize
+        const int maxSide = qMax(m_inputSize.width(), m_inputSize.height());
+        float scale = 1.0f;
+        int longest = std::max(image.cols, image.rows);
+        if (longest > maxSide) {
+            scale = static_cast<float>(maxSide) / longest;
+        }
+
+        int newW = std::max(1, static_cast<int>(std::round(image.cols * scale)));
+        int newH = std::max(1, static_cast<int>(std::round(image.rows * scale)));
+
         cv::Mat resizedImage;
-        cv::resize(image, resizedImage, cv::Size(m_inputSize.width(), m_inputSize.height()));
+        if (scale < 1.0f) {
+            cv::resize(image, resizedImage, cv::Size(newW, newH), 0, 0, cv::INTER_AREA);
+        } else {
+            resizedImage = image;
+        }
 
-        // Calculate scale factors to convert detections back to original image coordinates
-        float scaleX = static_cast<float>(image.cols) / m_inputSize.width();
-        float scaleY = static_cast<float>(image.rows) / m_inputSize.height();
+        m_detector->setInputSize(cv::Size(newW, newH));
 
-        qDebug() << "Resized to" << m_inputSize.width() << "x" << m_inputSize.height()
-                 << "scale:" << scaleX << "x" << scaleY;
+        // Single uniform factor to map detections back to original coordinates
+        float scaleX = static_cast<float>(image.cols) / newW;
+        float scaleY = static_cast<float>(image.rows) / newH;
+
+        qDebug() << "Resized to" << newW << "x" << newH << "scale:" << scaleX;
 
         // Set score threshold
         m_detector->setScoreThreshold(confidenceThreshold);
@@ -114,7 +132,7 @@ QVector<FaceDetection> FaceDetector::detect(const cv::Mat &image, float confiden
                 float h = faces.at<float>(i, 3);
                 float score = faces.at<float>(i, 14);
 
-                qDebug() << "  Face" << i << "- bbox (pixels in 640x640):" << x << y << w << h << "score:" << score;
+                qDebug() << "  Face" << i << "- bbox (pixels in detector input):" << x << y << w << h << "score:" << score;
 
                 // Scale coordinates back to original image size
                 float origX = x * scaleX;
@@ -160,11 +178,13 @@ QVector<FaceDetection> FaceDetector::detect(const cv::Mat &image, float confiden
 
 cv::Mat FaceDetector::qImageToCvMat(const QImage &image)
 {
-    // Convert QImage to cv::Mat
+    // OpenCV convention is BGR; both YuNet and the recognition preprocessing
+    // expect it, so everything downstream works on BGR mats
     QImage rgb = image.convertToFormat(QImage::Format_RGB888);
-    cv::Mat mat(rgb.height(), rgb.width(), CV_8UC3,
-                const_cast<uchar*>(rgb.bits()), rgb.bytesPerLine());
+    cv::Mat rgbMat(rgb.height(), rgb.width(), CV_8UC3,
+                   const_cast<uchar*>(rgb.bits()), rgb.bytesPerLine());
 
-    // Clone to ensure data persistence
-    return mat.clone();
+    cv::Mat bgr;
+    cv::cvtColor(rgbMat, bgr, cv::COLOR_RGB2BGR);
+    return bgr;
 }

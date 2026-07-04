@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include <QSet>
 #include <QVariantMap>
 #include <QDateTime>
 #include <QSqlDatabase>
@@ -145,6 +146,31 @@ public:
      */
     bool removeFaceFromPerson(int faceId);
 
+    /**
+     * @brief Mark face as ignored (not a face / not worth identifying)
+     */
+    bool setFaceIgnored(int faceId, bool ignored);
+
+    /**
+     * @brief Record that a face must never be auto-matched to a person
+     */
+    bool addNegativeMatch(int faceId, int personId);
+
+    /**
+     * @brief Check if a face was rejected for a person
+     */
+    bool hasNegativeMatch(int faceId, int personId);
+
+    /**
+     * @brief Delete all faces of a photo (used when re-processing)
+     */
+    bool deleteFacesForPhoto(int photoId);
+
+    /**
+     * @brief File paths of photos already processed (for incremental scans)
+     */
+    QSet<QString> getProcessedFilePaths();
+
     // === Person operations ===
 
     /**
@@ -200,6 +226,26 @@ public:
      * @brief Delete all data (GDPR right to be forgotten)
      */
     bool deleteAllData();
+
+    /**
+     * @brief Delete faces, people and rejections but keep photo records
+     *
+     * Used when the recognition engine changes and embeddings must be
+     * recomputed. Photos are marked unprocessed.
+     */
+    bool clearFaceData();
+
+    // === Settings ===
+
+    /**
+     * @brief Get a value from the settings table
+     */
+    QString getSetting(const QString &key, const QString &defaultValue = QString());
+
+    /**
+     * @brief Store a value in the settings table
+     */
+    bool setSetting(const QString &key, const QString &value);
 
     // === Statistics ===
 
