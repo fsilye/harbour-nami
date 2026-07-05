@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/faceutils.js" as FaceUtils
 
 Dialog {
     id: dialog
@@ -111,11 +112,28 @@ Dialog {
                         }
                         spacing: Theme.paddingMedium
 
-                        Icon {
-                            source: "image://theme/icon-m-person"
-                            color: selectedPersonId === model.person_id
-                                ? Theme.highlightColor
-                                : Theme.primaryColor
+                        Item {
+                            width: Theme.iconSizeMedium
+                            height: Theme.iconSizeMedium
+                            anchors.verticalCenter: parent.verticalCenter
+
+                            Image {
+                                id: avatarImage
+                                anchors.fill: parent
+                                source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                asynchronous: true
+                            }
+
+                            Icon {
+                                anchors.centerIn: parent
+                                source: "image://theme/icon-m-person"
+                                visible: avatarImage.status !== Image.Ready
+                                color: selectedPersonId === model.person_id
+                                    ? Theme.highlightColor
+                                    : Theme.primaryColor
+                            }
                         }
 
                         Label {

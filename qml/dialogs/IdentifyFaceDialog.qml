@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/faceutils.js" as FaceUtils
 
 Dialog {
     id: dialog
@@ -63,7 +64,7 @@ Dialog {
                 wrapMode: Text.WordWrap
             }
 
-            // Face preview (cropped)
+            // Cropped face preview
             Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width * 0.6
@@ -75,92 +76,41 @@ Dialog {
                     color: Theme.rgba(Theme.highlightBackgroundColor, 0.05)
                     border.color: Theme.rgba(Theme.highlightColor, 0.2)
                     border.width: 1
+                    clip: true
 
                     Image {
                         id: faceImage
                         anchors.fill: parent
                         anchors.margins: 2
-                        source: photoPath ? "file://" + photoPath : ""
-                        fillMode: Image.PreserveAspectFit
+                        source: FaceUtils.cropUrl(photoPath,
+                                                  faceBbox.x, faceBbox.y,
+                                                  faceBbox.width, faceBbox.height,
+                                                  false)
+                        sourceSize.width: 512
+                        sourceSize.height: 512
+                        fillMode: Image.PreserveAspectCrop
                         asynchronous: true
 
                         BusyIndicator {
                             anchors.centerIn: parent
                             running: parent.status === Image.Loading
                         }
-
-                        // Face bounding box overlay
-                        Rectangle {
-                            visible: faceImage.status === Image.Ready && faceBbox.width > 0
-                            color: "transparent"
-                            border.color: "#FF5252"  // Red
-                            border.width: 3
-
-                            // Calculate position and size based on image display
-                            property real imageDisplayWidth: faceImage.paintedWidth
-                            property real imageDisplayHeight: faceImage.paintedHeight
-                            property real imageOffsetX: (faceImage.width - imageDisplayWidth) / 2
-                            property real imageOffsetY: (faceImage.height - imageDisplayHeight) / 2
-
-                            // Scale factors
-                            property real scaleX: imageDisplayWidth / faceImage.sourceSize.width
-                            property real scaleY: imageDisplayHeight / faceImage.sourceSize.height
-
-                            x: imageOffsetX + (faceBbox.x * scaleX)
-                            y: imageOffsetY + (faceBbox.y * scaleY)
-                            width: faceBbox.width * scaleX
-                            height: faceBbox.height * scaleY
-
-                            // Corner markers for better visibility
-                            Rectangle {
-                                anchors { left: parent.left; top: parent.top }
-                                width: 12; height: 2
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { left: parent.left; top: parent.top }
-                                width: 2; height: 12
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { right: parent.right; top: parent.top }
-                                width: 12; height: 2
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { right: parent.right; top: parent.top }
-                                width: 2; height: 12
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { left: parent.left; bottom: parent.bottom }
-                                width: 12; height: 2
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { left: parent.left; bottom: parent.bottom }
-                                width: 2; height: 12
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { right: parent.right; bottom: parent.bottom }
-                                width: 12; height: 2
-                                color: "#FF5252"
-                            }
-                            Rectangle {
-                                anchors { right: parent.right; bottom: parent.bottom }
-                                width: 2; height: 12
-                                color: "#FF5252"
-                            }
-                        }
-
-                        Rectangle {
-                            anchors.fill: parent
-                            color: "transparent"
-                            border.color: Theme.rgba(Theme.highlightColor, 0.3)
-                            border.width: 1
-                        }
                     }
+                }
+            }
+
+            // Show the face in its photo context
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("View in photo")
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("../pages/FaceInPhotoPage.qml"), {
+                        photoPath: photoPath,
+                        bboxX: faceBbox.x,
+                        bboxY: faceBbox.y,
+                        bboxWidth: faceBbox.width,
+                        bboxHeight: faceBbox.height
+                    })
                 }
             }
 
@@ -229,7 +179,7 @@ Dialog {
                         }
                         spacing: Theme.paddingMedium
 
-                        // Avatar
+                        // Avatar (best face of the person, generic icon fallback)
                         Rectangle {
                             width: Theme.iconSizeMedium
                             height: Theme.iconSizeMedium
@@ -237,10 +187,20 @@ Dialog {
                             color: Theme.rgba(Theme.highlightBackgroundColor, selectedPersonId === model.person_id ? 0.3 : 0.1)
 
                             Image {
+                                id: avatarImage
+                                anchors.fill: parent
+                                source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                asynchronous: true
+                            }
+
+                            Image {
                                 anchors.centerIn: parent
                                 source: "image://theme/icon-m-person"
                                 width: Theme.iconSizeSmall
                                 height: Theme.iconSizeSmall
+                                visible: avatarImage.status !== Image.Ready
                             }
                         }
 

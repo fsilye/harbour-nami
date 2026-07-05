@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/faceutils.js" as FaceUtils
 
 Page {
     id: page
@@ -153,59 +154,41 @@ Page {
                             border.width: 1
                             clip: true
 
-                            // Face image (cropped using clipping)
-                            Item {
+                            // Cropped face thumbnail
+                            Image {
+                                id: faceImage
                                 anchors.fill: parent
                                 anchors.margins: 1
-                                clip: true
+                                source: FaceUtils.cropUrl(model.photo_path,
+                                                          model.bbox_x, model.bbox_y,
+                                                          model.bbox_width, model.bbox_height,
+                                                          false)
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                cache: true
+
+                                BusyIndicator {
+                                    anchors.centerIn: parent
+                                    running: faceImage.status === Image.Loading
+                                    size: BusyIndicatorSize.Small
+                                }
+                            }
+
+                            // Fallback placeholder when image fails to load
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 1
+                                color: Theme.rgba(Theme.highlightBackgroundColor, 0.1)
+                                visible: faceImage.status === Image.Error || faceImage.status === Image.Null
 
                                 Image {
-                                    id: faceImage
-                                    source: model.photo_path ? "file://" + model.photo_path : ""
-                                    asynchronous: true
-                                    cache: true
-
-                                    // Limit source size to reduce memory usage
-                                    sourceSize.width: 640
-                                    sourceSize.height: 640
-
-                                    // Calculate scale to fit the face bbox into the thumbnail
-                                    property real imgWidth: sourceSize.width > 0 ? sourceSize.width : 1
-                                    property real imgHeight: sourceSize.height > 0 ? sourceSize.height : 1
-                                    property real faceBboxWidth: model.bbox_width * imgWidth
-                                    property real faceBboxHeight: model.bbox_height * imgHeight
-                                    property real scaleX: parent.width / faceBboxWidth
-                                    property real scaleY: parent.height / faceBboxHeight
-                                    property real scale: Math.max(scaleX, scaleY)
-
-                                    // Position to center the face bbox
-                                    width: imgWidth * scale
-                                    height: imgHeight * scale
-                                    x: -(model.bbox_x * imgWidth * scale)
-                                    y: -(model.bbox_y * imgHeight * scale)
-
-                                    fillMode: Image.PreserveAspectFit
-
-                                    BusyIndicator {
-                                        anchors.centerIn: parent
-                                        running: parent.status === Image.Loading
-                                        size: BusyIndicatorSize.Small
-                                    }
-                                }
-
-                                // Fallback placeholder when image fails to load
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: Theme.rgba(Theme.highlightBackgroundColor, 0.1)
-                                    visible: faceImage.status === Image.Error || faceImage.status === Image.Null
-
-                                    Image {
-                                        anchors.centerIn: parent
-                                        source: "image://theme/icon-m-contact"
-                                        width: Theme.iconSizeLarge
-                                        height: Theme.iconSizeLarge
-                                        opacity: 0.3
-                                    }
+                                    anchors.centerIn: parent
+                                    source: "image://theme/icon-m-contact"
+                                    width: Theme.iconSizeLarge
+                                    height: Theme.iconSizeLarge
+                                    opacity: 0.3
                                 }
                             }
 

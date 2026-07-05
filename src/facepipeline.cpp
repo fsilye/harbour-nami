@@ -604,11 +604,46 @@ QVariantList FacePipeline::getPersonPhotos(int personId)
             photoMap["face_id"] = face.id;
             photoMap["file_path"] = photo.filePath;
             photoMap["date_taken"] = photo.dateTaken;
+            // Unix epoch seconds; Events/Memories group photos by this
+            photoMap["timestamp"] = photo.dateTaken.isValid()
+                ? photo.dateTaken.toMSecsSinceEpoch() / 1000 : 0;
             photoMap["similarity_score"] = face.similarityScore;
             photoMap["verified"] = face.verified;
+            photoMap["bbox_x"] = face.bbox.x();
+            photoMap["bbox_y"] = face.bbox.y();
+            photoMap["bbox_width"] = face.bbox.width();
+            photoMap["bbox_height"] = face.bbox.height();
             result.append(photoMap);
         }
     }
+
+    return result;
+}
+
+QVariantMap FacePipeline::getPersonBestFace(int personId)
+{
+    QVariantMap result;
+
+    if (!m_initialized || !m_database) {
+        return result;
+    }
+
+    Face face = m_database->getBestFaceForPerson(personId);
+    if (face.id < 0) {
+        return result;
+    }
+
+    Photo photo = m_database->getPhoto(face.photoId);
+    if (photo.filePath.isEmpty()) {
+        return result;
+    }
+
+    result["face_id"] = face.id;
+    result["photo_path"] = photo.filePath;
+    result["bbox_x"] = face.bbox.x();
+    result["bbox_y"] = face.bbox.y();
+    result["bbox_width"] = face.bbox.width();
+    result["bbox_height"] = face.bbox.height();
 
     return result;
 }
@@ -722,6 +757,11 @@ bool FacePipeline::deleteAllData()
     }
 
     invalidatePersonPrototypes();
+
+    // Face crops cached by the image provider are derived biometric data
+    QString cacheDir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    QDir(cacheDir + "/faces").removeRecursively();
+
     return m_database->deleteAllData();
 }
 

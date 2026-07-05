@@ -218,6 +218,13 @@ public:
     QVector<Face> getFacesForPerson(int personId);
 
     /**
+     * @brief Best face of a person for display (verified first, then
+     *        highest similarity, then detection confidence)
+     * @return Face with id -1 when the person has no faces
+     */
+    Face getBestFaceForPerson(int personId);
+
+    /**
      * @brief Get average embedding for a person
      */
     FaceEmbedding getAverageEmbedding(int personId);

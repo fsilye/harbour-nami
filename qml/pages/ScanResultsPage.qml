@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/faceutils.js" as FaceUtils
 
 Page {
     id: page
@@ -158,7 +159,7 @@ Page {
                         }
                         spacing: Theme.paddingMedium
 
-                        // Avatar
+                        // Avatar (best face of the person, icon fallback)
                         Rectangle {
                             width: Theme.iconSizeMedium
                             height: Theme.iconSizeMedium
@@ -166,10 +167,20 @@ Page {
                             color: Theme.rgba(Theme.highlightBackgroundColor, 0.2)
 
                             Image {
+                                id: avatarImage
+                                anchors.fill: parent
+                                source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                asynchronous: true
+                            }
+
+                            Image {
                                 anchors.centerIn: parent
                                 source: "image://theme/icon-m-person"
                                 width: Theme.iconSizeSmall
                                 height: Theme.iconSizeSmall
+                                visible: avatarImage.status !== Image.Ready
                             }
                         }
 

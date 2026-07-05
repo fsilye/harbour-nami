@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import "../js/faceutils.js" as FaceUtils
 
 Page {
     id: page
@@ -9,6 +10,8 @@ Page {
     property var currentFaces: []
 
     allowedOrientations: Orientation.All
+
+    property var currentFace: currentIndex < currentFaces.length ? currentFaces[currentIndex] : null
 
     // Load unmapped faces
     function loadUnmappedFaces() {
@@ -20,10 +23,13 @@ Page {
 
     // Ignore current face permanently (not a face, stranger, low quality)
     function skipFace() {
-        if (currentIndex < currentFaces.length) {
-            facePipeline.ignoreFace(currentFaces[currentIndex].face_id)
+        if (currentFace) {
+            facePipeline.ignoreFace(currentFace.face_id)
         }
+        nextFace()
+    }
 
+    function nextFace() {
         if (currentIndex < currentFaces.length - 1) {
             currentIndex++
         } else {
@@ -34,18 +40,10 @@ Page {
 
     // Identify face as new person or existing
     function identifyFace(personId, personName) {
-        if (currentIndex >= currentFaces.length) return
+        if (!currentFace) return
 
-        var faceId = currentFaces[currentIndex].face_id
-        facePipeline.identifyFace(faceId, personId, personName)
-
-        // Move to next face
-        if (currentIndex < currentFaces.length - 1) {
-            currentIndex++
-        } else {
-            // No more faces
-            pageStack.pop()
-        }
+        facePipeline.identifyFace(currentFace.face_id, personId, personName)
+        nextFace()
     }
 
     // People model for selection
@@ -97,19 +95,14 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
             }
 
-            Item {
-                width: parent.width
-                height: Theme.paddingLarge
-            }
-
-            // Face image card
+            // Cropped face card
             Item {
                 id: faceCard
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width * 0.8
+                width: parent.width * 0.7
                 height: width
 
-                visible: currentIndex < currentFaces.length
+                visible: currentFace !== null
 
                 Rectangle {
                     anchors.fill: parent
@@ -117,83 +110,30 @@ Page {
                     color: Theme.rgba(Theme.highlightBackgroundColor, 0.1)
                     border.color: Theme.rgba(Theme.highlightColor, 0.3)
                     border.width: 2
+                    clip: true
 
                     Image {
                         id: faceImage
                         anchors.fill: parent
                         anchors.margins: 4
-                        source: currentIndex < currentFaces.length
-                            ? "file://" + currentFaces[currentIndex].photo_path
+                        source: currentFace
+                            ? FaceUtils.cropUrl(currentFace.photo_path,
+                                                currentFace.bbox_x, currentFace.bbox_y,
+                                                currentFace.bbox_width, currentFace.bbox_height,
+                                                false)
                             : ""
-                        fillMode: Image.PreserveAspectFit
+                        sourceSize.width: 512
+                        sourceSize.height: 512
+                        fillMode: Image.PreserveAspectCrop
                         asynchronous: true
-
-                        // Limit source size to save memory
-                        sourceSize.width: 640
-                        sourceSize.height: 640
 
                         BusyIndicator {
                             anchors.centerIn: parent
                             running: parent.status === Image.Loading
                         }
-
-                        // Face bounding box overlay
-                        Item {
-                            anchors.fill: parent
-                            visible: faceImage.status === Image.Ready && currentIndex < currentFaces.length
-
-                            Rectangle {
-                                // Position on the painted image area
-                                property real imageDisplayWidth: faceImage.paintedWidth > 0 ? faceImage.paintedWidth : faceImage.width
-                                property real imageDisplayHeight: faceImage.paintedHeight > 0 ? faceImage.paintedHeight : faceImage.height
-                                property real imageOffsetX: (faceImage.width - imageDisplayWidth) / 2
-                                property real imageOffsetY: (faceImage.height - imageDisplayHeight) / 2
-
-                                // Get bbox from current face (normalized to source image size)
-                                property real bboxX: currentIndex < currentFaces.length ? currentFaces[currentIndex].bbox_x : 0
-                                property real bboxY: currentIndex < currentFaces.length ? currentFaces[currentIndex].bbox_y : 0
-                                property real bboxW: currentIndex < currentFaces.length ? currentFaces[currentIndex].bbox_width : 0
-                                property real bboxH: currentIndex < currentFaces.length ? currentFaces[currentIndex].bbox_height : 0
-
-                                // Scale factors from loaded image size to displayed size
-                                // sourceSize gives us the size at which image was loaded (640x640 max)
-                                property real scaleX: imageDisplayWidth / (faceImage.sourceSize.width > 0 ? faceImage.sourceSize.width : 1)
-                                property real scaleY: imageDisplayHeight / (faceImage.sourceSize.height > 0 ? faceImage.sourceSize.height : 1)
-
-                                x: imageOffsetX + (bboxX * scaleX)
-                                y: imageOffsetY + (bboxY * scaleY)
-                                width: bboxW * scaleX
-                                height: bboxH * scaleY
-
-                                color: "transparent"
-                                border.color: "#FF5252"
-                                border.width: 3
-
-                                // Corner markers for better visibility
-                                Repeater {
-                                    model: [
-                                        {ax: "left", ay: "top", w: 20, h: 3},
-                                        {ax: "left", ay: "top", w: 3, h: 20},
-                                        {ax: "right", ay: "top", w: 20, h: 3},
-                                        {ax: "right", ay: "top", w: 3, h: 20},
-                                        {ax: "left", ay: "bottom", w: 20, h: 3},
-                                        {ax: "left", ay: "bottom", w: 3, h: 20},
-                                        {ax: "right", ay: "bottom", w: 20, h: 3},
-                                        {ax: "right", ay: "bottom", w: 3, h: 20}
-                                    ]
-                                    Rectangle {
-                                        anchors[modelData.ax]: parent[modelData.ax]
-                                        anchors[modelData.ay]: parent[modelData.ay]
-                                        width: modelData.w
-                                        height: modelData.h
-                                        color: "#FF5252"
-                                    }
-                                }
-                            }
-                        }
                     }
 
-                    // Confidence indicator
+                    // Detection confidence badge
                     Rectangle {
                         anchors {
                             top: parent.top
@@ -203,41 +143,45 @@ Page {
                         width: confidenceLabel.width + Theme.paddingMedium * 2
                         height: confidenceLabel.height + Theme.paddingSmall * 2
                         radius: height / 2
-                        color: Theme.rgba(
-                            currentIndex < currentFaces.length && currentFaces[currentIndex].confidence > 0.7
-                                ? "#4CAF50"  // Green
-                                : (currentIndex < currentFaces.length && currentFaces[currentIndex].confidence > 0.5
-                                    ? "#FFC107"  // Yellow
-                                    : "#F44336"),  // Red
-                            0.9
-                        )
+                        color: Theme.rgba(Theme.highlightBackgroundColor, 0.8)
 
                         Label {
                             id: confidenceLabel
                             anchors.centerIn: parent
-                            text: currentIndex < currentFaces.length
-                                ? Math.round(currentFaces[currentIndex].confidence * 100) + "%"
+                            text: currentFace
+                                ? Math.round(currentFace.confidence * 100) + "%"
                                 : ""
                             font.pixelSize: Theme.fontSizeExtraSmall
                             font.bold: true
-                            color: "white"
+                            color: Theme.primaryColor
                         }
                     }
                 }
             }
 
-            Item {
-                width: parent.width
-                height: Theme.paddingLarge
+            // Show the face in its photo context
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("View in photo")
+                visible: currentFace !== null
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("FaceInPhotoPage.qml"), {
+                        photoPath: currentFace.photo_path,
+                        bboxX: currentFace.bbox_x,
+                        bboxY: currentFace.bbox_y,
+                        bboxWidth: currentFace.bbox_width,
+                        bboxHeight: currentFace.bbox_height
+                    })
+                }
             }
 
             // Action buttons row
             Row {
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: Theme.paddingLarge
-                visible: currentIndex < currentFaces.length
+                spacing: Theme.paddingLarge * 2
+                visible: currentFace !== null
 
-                // Skip button (left)
+                // Ignore button (left)
                 IconButton {
                     icon.source: "image://theme/icon-m-dismiss"
                     onClicked: skipFace()
@@ -247,7 +191,7 @@ Page {
                         width: parent.width
                         height: parent.height
                         radius: width / 2
-                        color: Theme.rgba("#F44336", 0.2)
+                        color: Theme.rgba(Theme.errorColor, 0.2)
                         z: -1
                     }
                 }
@@ -274,15 +218,10 @@ Page {
                         width: parent.width
                         height: parent.height
                         radius: width / 2
-                        color: Theme.rgba("#4CAF50", 0.2)
+                        color: Theme.rgba(Theme.highlightColor, 0.2)
                         z: -1
                     }
                 }
-            }
-
-            Item {
-                width: parent.width
-                height: Theme.paddingMedium
             }
 
             // Instructions
@@ -294,7 +233,7 @@ Page {
                 color: Theme.secondaryColor
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
-                visible: currentIndex < currentFaces.length
+                visible: currentFace !== null
             }
 
             // Completion message

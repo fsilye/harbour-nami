@@ -149,6 +149,14 @@ public:
     Q_INVOKABLE QVariantList getPersonPhotos(int personId);
 
     /**
+     * @brief Best face of a person for avatar display
+     * @param personId Person ID
+     * @return Map with face_id, photo_path and normalized bbox fields,
+     *         empty map when the person has no faces
+     */
+    Q_INVOKABLE QVariantMap getPersonBestFace(int personId);
+
+    /**
      * @brief Delete a person and unmap their faces
      * @param personId Person ID
      * @return true if successful

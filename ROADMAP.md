@@ -3,37 +3,27 @@
 Based on the July 2026 code audit. Ordered by priority: P0 fixes the core
 recognition quality problem, then performance, security, UI/UX.
 
-## Next up — field-reported issues (v0.5.1 on device, 2026-07-04)
+## Field-reported issues (v0.5.1 on device, 2026-07-04) — fixed in v0.6.0
 
-1. **"Identify faces" shows "could not load page"** — QML syntax error in
-   `IdentifyFacesPage.qml`: the corner-marker Repeater binds
-   `anchors[modelData.ax]: parent[modelData.ax]` (bracket-indexed binding
-   targets are not valid QML), so the whole page fails to parse. Fix:
-   replace the dynamic-anchor trick with explicit corner rectangles (or
-   `AnchorChanges`/`Component.onCompleted` assignment).
-2. **Events and Memories always empty** — both pages read
-   `photo.timestamp` (expected as Unix epoch) but `getPersonPhotos()`
-   returns `date_taken` (ISO datetime); the `if (!photo.timestamp) continue`
-   guard therefore skips every photo. Fix: expose `timestamp` (epoch) in
-   `getPersonPhotos()` or parse `date_taken` in QML. Note: Memories also
-   needs real capture dates to be meaningful → depends on the EXIF item
-   below (file mtime resets on copy/sync).
-3. **Person avatars on the main page** — show a cropped thumbnail of the
-   person's best face (highest similarity, preferring verified) instead of
-   the generic contact icon. Plan: `QQuickImageProvider` that crops the
-   bbox (with margin) from the source photo + disk cache
-   (`~/.cache/harbour-nami/faces/<face_id>.jpg`), invalidated when the face
-   mapping changes. Covers the existing "Real face thumbnails" item.
-4. **Face framing and highlighting in the identify flow** — two problems:
-   - The red square is misplaced/mis-scaled (often a patch of hair): the
-     bbox is stored normalized (0-1) but the QML overlay multiplies it by
-     pixel scale factors as if it were in source-image pixels.
-   - Tapping a face square gives no visual cue of *which* person on the
-     full-size photo is being identified.
-   Fix: show the cropped face itself (bbox + ~40% margin, via the same
-   image provider as item 3) as the main "who is this?" visual, and add a
-   "show in photo" action that opens the full image with the target face's
-   bbox correctly scaled and highlighted (dim everything outside the bbox).
+1. ~~**"Identify faces" shows "could not load page"**~~ Done: the invalid
+   `anchors[...]` bindings are gone; the page now shows the cropped face
+   via the image provider instead of the photo + overlay.
+2. ~~**Events and Memories always empty**~~ Done: `getPersonPhotos()` now
+   exposes `timestamp` (epoch seconds) that both pages expect. Real capture
+   dates still depend on the EXIF item below (file mtime resets on
+   copy/sync).
+3. ~~**Person avatars**~~ Done: new `FaceImageProvider`
+   (`image://faces/crop?...`) crops the face bbox with 45% margin from the
+   EXIF-oriented photo, disk-cached under `~/.cache/harbour-nami/faces/`
+   (owner-only files, wiped by "Clear all data"), optional circular mask.
+   Used on MainPage, ScanResultsPage, SelectPersonDialog and
+   IdentifyFaceDialog (best face = verified first, then highest similarity,
+   via `getPersonBestFace()`).
+4. ~~**Face framing and highlighting in the identify flow**~~ Done: all
+   face squares now show the provider's crop (correct framing with margin),
+   and both identify flows have a "View in photo" action opening the new
+   `FaceInPhotoPage` — full image with the target face framed and the rest
+   dimmed, bbox scaled correctly this time (normalized bbox × painted size).
 
 ## P0 — Recognition accuracy and learning (why it "doesn't work well")
 

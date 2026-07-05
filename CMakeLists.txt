@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(harbour-nami VERSION 0.5.1 LANGUAGES CXX)
+project(harbour-nami VERSION 0.6.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -50,6 +50,7 @@ set(SOURCES
     src/facerecognizer.cpp
     src/facedatabase.cpp
     src/facepipeline.cpp
+    src/faceimageprovider.cpp
 )
 
 # Headers
@@ -59,6 +60,7 @@ set(HEADERS
     src/facerecognizer.h
     src/facedatabase.h
     src/facepipeline.h
+    src/faceimageprovider.h
 )
 
 # QML files are installed as a directory (see install(DIRECTORY qml ...))

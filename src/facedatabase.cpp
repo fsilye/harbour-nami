@@ -667,6 +667,24 @@ QVector<Face> FaceDatabase::getFacesForPerson(int personId)
     return faces;
 }
 
+Face FaceDatabase::getBestFaceForPerson(int personId)
+{
+    QSqlQuery query(m_db);
+    query.prepare(R"(
+        SELECT id FROM faces
+        WHERE person_id = :person_id
+        ORDER BY verified DESC, similarity_score DESC, confidence DESC
+        LIMIT 1
+    )");
+    query.bindValue(":person_id", personId);
+
+    if (query.exec() && query.next()) {
+        return getFace(query.value(0).toInt());
+    }
+
+    return Face{-1, -1, QRectF(), 0.0f, FaceEmbedding(), -1, 0.0f, false, QDateTime()};
+}
+
 FaceEmbedding FaceDatabase::getAverageEmbedding(int personId)
 {
     QVector<Face> allFaces = getFacesForPerson(personId);

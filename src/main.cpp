@@ -16,6 +16,7 @@
 #include "facedetector.h"
 #include "facerecognizer.h"
 #include "facedatabase.h"
+#include "faceimageprovider.h"
 
 int main(int argc, char *argv[])
 {
@@ -76,6 +77,9 @@ int main(int argc, char *argv[])
         qCritical() << "Make sure ML models are present in:" << appDir + "/models/";
         // Continue anyway - QML will show error page
     }
+
+    // Face thumbnail provider (crops cached in the app cache dir)
+    view->engine()->addImageProvider("faces", new FaceImageProvider(cacheDir));
 
     // Expose to QML
     view->rootContext()->setContextProperty("facePipeline", pipeline);
