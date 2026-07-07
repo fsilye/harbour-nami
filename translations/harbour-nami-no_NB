@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="no_NB">
+<context>
+    <name>AboutPage</name>
+    <message>
+        <source>100% on-device processing</source>
+        <translation>100 % lokal behandling på enheten</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>Om</translation>
+    </message>
+    <message>
+        <source>Automatic face detection</source>
+        <translation>Automatisk ansiktsgjenkjenning</translation>
+    </message>
+    <message>
+        <source>Face Recognition Gallery</source>
+        <translation>Ansiktsgjenkjenningsgalleri</translation>
+    </message>
+    <message>
+        <source>Features</source>
+        <translation>Funksjoner</translation>
+    </message>
+    <message>
+        <source>Framework</source>
+        <translation>Rammeverk</translation>
+    </message>
+    <message>
+        <source>Intelligent photo organization using on-device face recognition</source>
+        <translation>Intelligent bildeorganisering med lokal ansiktsgjenkjenning på enheten</translation>
+    </message>
+    <message>
+        <source>License</source>
+        <translation>Lisens</translation>
+    </message>
+    <message>
+        <source>ML Engine</source>
+        <translation>ML-motor</translation>
+    </message>
+    <message>
+        <source>No internet connection required</source>
+        <translation>Krever ingen internettilkobling</translation>
+    </message>
+    <message>
+        <source>Open Source Software</source>
+        <translation>Programvare med åpen kildekode</translation>
+    </message>
+    <message>
+        <source>Platform</source>
+        <translation>Plattform</translation>
+    </message>
+    <message>
+        <source>Privacy-first design</source>
+        <translation>Personvernfokusert design</translation>
+    </message>
+    <message>
+        <source>Smart photo grouping</source>
+        <translation>Smart bildegruppering</translation>
+    </message>
+    <message>
+        <source>Source Code</source>
+        <translation>Kildekode</translation>
+    </message>
+    <message>
+        <source>Technology</source>
+        <translation>Teknologi</translation>
+    </message>
+</context>
+<context>
+    <name>ConfirmDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <source>Confirm</source>
+        <translation>Bekreft</translation>
+    </message>
+</context>
+<context>
+    <name>CoverPage</name>
+    <message>
+        <source>%1 / %2</source>
+        <translation>%1 / %2</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n people</source>
+        <translation>
+            <numerusform>%n person</numerusform>
+            <numerusform>%n personer</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>%n photos</source>
+        <translation>
+            <numerusform>%n bilde</numerusform>
+            <numerusform>%n bilder</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Scanning...</source>
+        <translation>Skanner...</translation>
+    </message>
+</context>
+<context>
+    <name>EventsPage</name>
+    <message>
+        <source>Events</source>
+        <translation>Hendelser</translation>
+    </message>
+    <message>
+        <source>Events are created when you have multiple photos from the same day</source>
+        <translation>Hendelser opprettes når du har flere bilder fra samme dag</translation>
+    </message>
+    <message>
+        <source>No events detected</source>
+        <translation>Ingen hendelser oppdaget</translation>
+    </message>
+    <message>
+        <source>Photos automatically grouped by date</source>
+        <translation>Bilder grupperes automatisk etter dato</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>FaceInPhotoPage</name>
+    <message>
+        <source>Tap to go back</source>
+        <translation>Trykk for å gå tilbake</translation>
+    </message>
+</context>
+<context>
+    <name>IdentifyFaceDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <source>Enter a name above to create the first person</source>
+        <translation>Skriv inn et navn over for å opprette den første personen</translation>
+    </message>
+    <message>
+        <source>Enter name (e.g., John, Mom, Friend)</source>
+        <translation>Skriv inn navn (f.eks. Ola, Mamma, Venn)</translation>
+    </message>
+    <message>
+        <source>Identify</source>
+        <translation>Identifiser</translation>
+    </message>
+    <message>
+        <source>No people yet</source>
+        <translation>Ingen personer ennå</translation>
+    </message>
+    <message>
+        <source>Or assign to existing person:</source>
+        <translation>Eller tildel til eksisterende person:</translation>
+    </message>
+    <message>
+        <source>Person name</source>
+        <translation>Navn på person</translation>
+    </message>
+    <message>
+        <source>View in photo</source>
+        <translation>Vis i bilde</translation>
+    </message>
+    <message>
+        <source>Who is this?</source>
+        <translation>Hvem er dette?</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>IdentifyFacesPage</name>
+    <message>
+        <source>%1 of %2</source>
+        <translation>%1 av %2</translation>
+    </message>
+    <message>
+        <source>All detected faces have been identified</source>
+        <translation>Alle oppdagede ansikter har blitt identifisert</translation>
+    </message>
+    <message>
+        <source>All done!</source>
+        <translation>Ferdig!</translation>
+    </message>
+    <message>
+        <source>Identify Faces</source>
+        <translation>Identifiser ansikter</translation>
+    </message>
+    <message>
+        <source>No faces to identify</source>
+        <translation>Ingen ansikter å identifisere</translation>
+    </message>
+    <message>
+        <source>Skip all</source>
+        <translation>Hopp over alle</translation>
+    </message>
+    <message>
+        <source>View in photo</source>
+        <translation>Vis i bilde</translation>
+    </message>
+    <message>
+        <source>You've reviewed all unknown faces</source>
+        <translation>Du har gått gjennom alle ukjente ansikter</translation>
+    </message>
+    <message>
+        <source>✗ Ignore (not a face or low quality, won't be shown again)
+✓ Identify (assign to a person)</source>
+        <translation>✗ Ignorer (ikke et ansikt eller lav kvalitet, vil ikke vises igjen)
+✓ Identifiser (tildel til en person)</translation>
+    </message>
+</context>
+<context>
+    <name>MainPage</name>
+    <message>
+        <source>About</source>
+        <translation>Om</translation>
+    </message>
+    <message>
+        <source>Automatically organize your photos by faces. All processing happens on your device for complete privacy.</source>
+        <translation>Organiser bildene dine automatisk etter ansikter. All behandling skjer på enheten din for fullstendig personvern.</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Slett</translation>
+    </message>
+    <message>
+        <source>Delete person?</source>
+        <translation>Slette person?</translation>
+    </message>
+    <message>
+        <source>Enter name</source>
+        <translation>Skriv inn navn</translation>
+    </message>
+    <message>
+        <source>Events</source>
+        <translation>Hendelser</translation>
+    </message>
+    <message>
+        <source>Face Recognition Gallery</source>
+        <translation>Ansiktsgjenkjenningsgalleri</translation>
+    </message>
+    <message>
+        <source>Identify Faces</source>
+        <translation>Identifiser ansikter</translation>
+    </message>
+    <message>
+        <source>Memories</source>
+        <translation>Minner</translation>
+    </message>
+    <message>
+        <source>Merge</source>
+        <translation>Slå sammen</translation>
+    </message>
+    <message>
+        <source>Merge %1 into...</source>
+        <translation>Slå sammen %1 med...</translation>
+    </message>
+    <message>
+        <source>Merge into...</source>
+        <translation>Slå sammen med...</translation>
+    </message>
+    <message>
+        <source>Nami</source>
+        <translation>Nami</translation>
+    </message>
+    <message>
+        <source>No faces detected yet</source>
+        <translation>Ingen ansikter oppdaget ennå</translation>
+    </message>
+    <message>
+        <source>People (%1)</source>
+        <translation>Personer (%1)</translation>
+    </message>
+    <message>
+        <source>Pull down to scan your gallery</source>
+        <translation>Dra ned for å skanne galleriet ditt</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Gi nytt navn</translation>
+    </message>
+    <message>
+        <source>Rename Person</source>
+        <translation>Gi nytt navn til person</translation>
+    </message>
+    <message>
+        <source>Scan Gallery</source>
+        <translation>Skann galleri</translation>
+    </message>
+    <message>
+        <source>Search people</source>
+        <translation>Søk etter personer</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Innstillinger</translation>
+    </message>
+    <message>
+        <source>Sort by Name</source>
+        <translation>Sorter etter navn</translation>
+    </message>
+    <message>
+        <source>Sort by Photos</source>
+        <translation>Sorter etter bilder</translation>
+    </message>
+    <message>
+        <source>This will remove %1 and unlink all their photos</source>
+        <translation>Dette vil fjerne %1 og koble fra alle bildene deres</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Ukjent</translation>
+    </message>
+    <message>
+        <source>most photos</source>
+        <translation>flest bilder</translation>
+    </message>
+    <message>
+        <source>people</source>
+        <translation>personer</translation>
+    </message>
+    <message>
+        <source>person</source>
+        <translation>person</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>MemoriesPage</name>
+    <message>
+        <source> year ago</source>
+        <translation> år siden</translation>
+    </message>
+    <message>
+        <source> years ago</source>
+        <translation> år siden</translation>
+    </message>
+    <message>
+        <source>Memories</source>
+        <translation>Minner</translation>
+    </message>
+    <message>
+        <source>No memories</source>
+        <translation>Ingen minner</translation>
+    </message>
+    <message>
+        <source>No photos found from this day in previous years</source>
+        <translation>Ingen bilder funnet fra denne dagen i tidligere år</translation>
+    </message>
+    <message>
+        <source>Photos from this day in previous years</source>
+        <translation>Bilder fra denne dagen i tidligere år</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>ModelDownloadPage</name>
+    <message>
+        <source>All models run 100% on your device. No data is sent to external servers.</source>
+        <translation>Alle modeller kjører 100 % på din enhet. Ingen data sendes til eksterne servere.</translation>
+    </message>
+    <message>
+        <source>ArcFace Recognition</source>
+        <translation>ArcFace-gjenkjenning</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Fortsett</translation>
+    </message>
+    <message>
+        <source>Download Models</source>
+        <translation>Last ned modeller</translation>
+    </message>
+    <message>
+        <source>Downloading %1...</source>
+        <translation>Laster ned %1...</translation>
+    </message>
+    <message>
+        <source>ML Models Setup</source>
+        <translation>Konfigurering av ML-modeller</translation>
+    </message>
+    <message>
+        <source>Manual Installation</source>
+        <translation>Manuell installasjon</translation>
+    </message>
+    <message>
+        <source>Manual installation required</source>
+        <translation>Manuell installasjon kreves</translation>
+    </message>
+    <message>
+        <source>Nami requires machine learning models for face detection and recognition.</source>
+        <translation>Nami krever maskinlæringsmodeller for ansiktsdetektering og -gjenkjenning.</translation>
+    </message>
+    <message>
+        <source>Not installed</source>
+        <translation>Ikke installert</translation>
+    </message>
+    <message>
+        <source>Open Documentation</source>
+        <translation>Åpne dokumentasjon</translation>
+    </message>
+    <message>
+        <source>Required Models</source>
+        <translation>Nødvendige modeller</translation>
+    </message>
+    <message>
+        <source>Size: %1 MB</source>
+        <translation>Størrelse: %1 MB</translation>
+    </message>
+    <message>
+        <source>The ArcFace model requires manual installation. Please see the documentation for instructions.</source>
+        <translation>ArcFace-modellen krever manuell installasjon. Vennligst se dokumentasjonen for instruksjoner.</translation>
+    </message>
+    <message>
+        <source>YuNet Face Detection</source>
+        <translation>YuNet-ansiktsdetektering</translation>
+    </message>
+    <message>
+        <source>✓ Installed</source>
+        <translation>✓ Installert</translation>
+    </message>
+</context>
+<context>
+    <name>PersonDetailPage</name>
+    <message>
+        <source>Confirm all matches</source>
+        <translation>Bekreft alle treff</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation>Slett</translation>
+    </message>
+    <message>
+        <source>Deleting %1</source>
+        <translation>Sletter %1</translation>
+    </message>
+    <message>
+        <source>Enter name</source>
+        <translation>Skriv inn navn</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Ingen bilder</translation>
+    </message>
+    <message>
+        <source>Photos</source>
+        <translation>Bilder</translation>
+    </message>
+    <message>
+        <source>Remove from person</source>
+        <translation>Fjern fra person</translation>
+    </message>
+    <message>
+        <source>Removing</source>
+        <translation>Fjerner</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation>Gi nytt navn</translation>
+    </message>
+    <message>
+        <source>Rename Person</source>
+        <translation>Gi nytt navn til person</translation>
+    </message>
+    <message>
+        <source>This person hasn't been detected in any photos yet</source>
+        <translation>Denne personen har ikke blitt oppdaget i noen bilder ennå</translation>
+    </message>
+    <message>
+        <source>View full photo</source>
+        <translation>Vis fullt bilde</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+    <message>
+        <source>with this person</source>
+        <translation>med denne personen</translation>
+    </message>
+</context>
+<context>
+    <name>PersonPage</name>
+    <message>
+        <source>No photos</source>
+        <translation>Ingen bilder</translation>
+    </message>
+    <message>
+        <source>Photos</source>
+        <translation>Bilder</translation>
+    </message>
+    <message>
+        <source>Share All Photos</source>
+        <translation>Del alle bilder</translation>
+    </message>
+    <message>
+        <source>This person has no associated photos yet</source>
+        <translation>Denne personen har ingen tilknyttede bilder ennå</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation>Ukjent</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>PhotoViewerPage</name>
+    <message>
+        <source>Close</source>
+        <translation>Lukk</translation>
+    </message>
+    <message>
+        <source>Failed to load image</source>
+        <translation>Klarte ikke å laste inn bilde</translation>
+    </message>
+</context>
+<context>
+    <name>RenamePersonDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <source>Enter person name</source>
+        <translation>Skriv inn personens navn</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation>Navn</translation>
+    </message>
+    <message>
+        <source>Rename Person</source>
+        <translation>Gi nytt navn til person</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation>Lagre</translation>
+    </message>
+</context>
+<context>
+    <name>ScanResultsPage</name>
+    <message numerus="yes">
+        <source>%n faces need to be identified</source>
+        <translation>
+            <numerusform>%n ansikt må identifiseres</numerusform>
+            <numerusform>%n ansikter må identifiseres</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>1 face needs to be identified</source>
+        <translation>1 ansikt må identifiseres</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Ferdig</translation>
+    </message>
+    <message>
+        <source>No faces detected</source>
+        <translation>Ingen ansikter oppdaget</translation>
+    </message>
+    <message>
+        <source>No faces were found in your photos</source>
+        <translation>Ingen ansikter ble funnet i bildene dine</translation>
+    </message>
+    <message>
+        <source>Recognized people</source>
+        <translation>Gjenkjente personer</translation>
+    </message>
+    <message>
+        <source>Review unknown faces</source>
+        <translation>Gå gjennom ukjente ansikter</translation>
+    </message>
+    <message>
+        <source>Scan Complete</source>
+        <translation>Skanning fullført</translation>
+    </message>
+    <message>
+        <source>Scan summary</source>
+        <translation>Skanningssammendrag</translation>
+    </message>
+    <message>
+        <source>These faces were automatically matched to people you've already identified:</source>
+        <translation>Disse ansiktene ble automatisk matchet med personer du allerede har identifisert:</translation>
+    </message>
+    <message>
+        <source>Unknown faces</source>
+        <translation>Ukjente ansikter</translation>
+    </message>
+    <message>
+        <source>face</source>
+        <translation>ansikt</translation>
+    </message>
+    <message>
+        <source>faces</source>
+        <translation>ansikter</translation>
+    </message>
+    <message>
+        <source>photo</source>
+        <translation>bilde</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>bilder</translation>
+    </message>
+</context>
+<context>
+    <name>ScanningPage</name>
+    <message>
+        <source>%1 files processed out of %2 files</source>
+        <translation>%1 av %2 filer behandlet</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Ferdig</translation>
+    </message>
+    <message>
+        <source>Faces</source>
+        <translation>Ansikter</translation>
+    </message>
+    <message numerus="yes">
+        <source>Found %n face(s)</source>
+        <translation>
+            <numerusform>Fant %n ansikt</numerusform>
+            <numerusform>Fant %n ansikter</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Photos</source>
+        <translation>Bilder</translation>
+    </message>
+    <message>
+        <source>Preparing...</source>
+        <translation>Forbereder...</translation>
+    </message>
+    <message>
+        <source>Scan Complete</source>
+        <translation>Skanning fullført</translation>
+    </message>
+    <message>
+        <source>Scanning Gallery</source>
+        <translation>Skanner galleri</translation>
+    </message>
+</context>
+<context>
+    <name>SelectPersonDialog</name>
+    <message>
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
+    <message>
+        <source>Enter a name to create the first person</source>
+        <translation>Skriv inn et navn for å opprette den første personen</translation>
+    </message>
+    <message>
+        <source>Enter name</source>
+        <translation>Skriv inn navn</translation>
+    </message>
+    <message>
+        <source>Identify</source>
+        <translation>Identifiser</translation>
+    </message>
+    <message>
+        <source>New person</source>
+        <translation>Ny person</translation>
+    </message>
+    <message>
+        <source>No people yet</source>
+        <translation>Ingen personer ennå</translation>
+    </message>
+    <message>
+        <source>Or select existing:</source>
+        <translation>Eller velg eksisterende:</translation>
+    </message>
+    <message>
+        <source>Select person:</source>
+        <translation>Velg person:</translation>
+    </message>
+    <message>
+        <source>Who is this?</source>
+        <translation>Hvem er dette?</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsPage</name>
+    <message>
+        <source>All face recognition processing happens locally on your device. No data is sent to external servers.</source>
+        <translation>All behandling av ansiktsgjenkjenning skjer lokalt på enheten din. Ingen data sendes til eksterne servere.</translation>
+    </message>
+    <message>
+        <source>Clear all data</source>
+        <translation>Tøm alle data</translation>
+    </message>
+    <message>
+        <source>Data Management</source>
+        <translation>Dataadministrasjon</translation>
+    </message>
+    <message>
+        <source>Deleting all data</source>
+        <translation>Sletter alle data</translation>
+    </message>
+    <message>
+        <source>Detected faces</source>
+        <translation>Oppdagede ansikter</translation>
+    </message>
+    <message>
+        <source>Export data</source>
+        <translation>Eksporter data</translation>
+    </message>
+    <message>
+        <source>Export failed</source>
+        <translation>Eksport mislyktes</translation>
+    </message>
+    <message>
+        <source>Exported to %1</source>
+        <translation>Eksportert til %1</translation>
+    </message>
+    <message>
+        <source>Higher values reduce wrong matches but leave more faces to identify manually</source>
+        <translation>Høyere verdier reduserer feilaktige treff, men etterlater flere ansikter som må identifiseres manuelt</translation>
+    </message>
+    <message>
+        <source>Named people</source>
+        <translation>Navngitte personer</translation>
+    </message>
+    <message>
+        <source>On-device processing</source>
+        <translation>Behandling på enheten</translation>
+    </message>
+    <message>
+        <source>Privacy</source>
+        <translation>Personvern</translation>
+    </message>
+    <message>
+        <source>Recognition strictness</source>
+        <translation>Strikthet for gjenkjenning</translation>
+    </message>
+    <message>
+        <source>Scan folder</source>
+        <translation>Skann mappe</translation>
+    </message>
+    <message>
+        <source>Scanning</source>
+        <translation>Skanning</translation>
+    </message>
+    <message>
+        <source>Select folder to scan</source>
+        <translation>Velg mappe som skal skannes</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Innstillinger</translation>
+    </message>
+    <message>
+        <source>Storage</source>
+        <translation>Lagring</translation>
+    </message>
+    <message>
+        <source>Storage used</source>
+        <translation>Lagringsplass brukt</translation>
+    </message>
+</context>
+<context>
+    <name>UnknownFacesPage</name>
+    <message numerus="yes">
+        <source>%n faces found</source>
+        <translation>
+            <numerusform>%n ansikt funnet</numerusform>
+            <numerusform>%n ansikter funnet</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>1 face found</source>
+        <translation>1 ansikt funnet</translation>
+    </message>
+    <message>
+        <source>All detected faces have been identified</source>
+        <translation>Alle oppdagede ansikter har blitt identifisert</translation>
+    </message>
+    <message>
+        <source>Identify people</source>
+        <translation>Identifiser personer</translation>
+    </message>
+    <message>
+        <source>No faces to identify</source>
+        <translation>Ingen ansikter å identifisere</translation>
+    </message>
+    <message>
+        <source>No unknown faces</source>
+        <translation>Ingen ukjente ansikter</translation>
+    </message>
+    <message>
+        <source>Tap on a face to give it a name. Faces from the same person will be grouped together automatically.</source>
+        <translation>Trykk på et ansikt for å gi det et navn. Ansikter av samme person vil bli gruppert sammen automatisk.</translation>
+    </message>
+    <message>
+        <source>Unknown Faces</source>
+        <translation>Ukjente ansikter</translation>
+    </message>
+</context>
+</TS>
