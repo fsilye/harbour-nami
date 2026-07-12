@@ -229,6 +229,10 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Deleting %1</source>
+        <translation>Suppression de %1</translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation>Associer à un contact</translation>
     </message>
@@ -465,6 +469,18 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Link to contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Changer le contact associé</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Dissocier le contact</translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation>Confirmer toutes les correspondances</translation>
@@ -775,6 +791,14 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Grid ×2</source>
+        <translation>Grille ×2</translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation>Grille ×4</translation>
+    </message>
     <message>
         <source>Scanned folders</source>
         <translation>Dossiers analysés</translation>

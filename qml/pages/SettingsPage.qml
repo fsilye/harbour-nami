@@ -142,15 +142,21 @@ Page {
                 width: parent.width
                 label: qsTr("People layout")
                 enabled: facePipeline && facePipeline.initialized
-                currentIndex: peopleViewMode === "grid" ? 1 : 0
+                // "grid" is the legacy value for the 2-column grid
+                currentIndex: (peopleViewMode === "grid4") ? 2
+                              : (peopleViewMode === "grid2" || peopleViewMode === "grid") ? 1
+                              : 0
 
                 menu: ContextMenu {
                     MenuItem { text: qsTr("List") }
-                    MenuItem { text: qsTr("Grid") }
+                    MenuItem { text: qsTr("Grid ×2") }
+                    MenuItem { text: qsTr("Grid ×4") }
                 }
 
                 onCurrentIndexChanged: {
-                    var mode = currentIndex === 1 ? "grid" : "list"
+                    var mode = currentIndex === 2 ? "grid4"
+                             : currentIndex === 1 ? "grid2"
+                             : "list"
                     if (mode !== peopleViewMode) {
                         peopleViewMode = mode
                         facePipeline.setSetting("people_view_mode", mode)

@@ -229,6 +229,10 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Deleting %1</source>
+        <translation>Poistetaan %1</translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation>Yhdistä yhteystietoon</translation>
     </message>
@@ -465,6 +469,18 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Link to contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Vaihda yhdistettyä yhteystietoa</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Poista yhteystiedon linkitys</translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation>Vahvista kaikki osumat</translation>
@@ -775,6 +791,14 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Grid ×2</source>
+        <translation>Ruudukko ×2</translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation>Ruudukko ×4</translation>
+    </message>
     <message>
         <source>Scanned folders</source>
         <translation>Skannatut kansiot</translation>

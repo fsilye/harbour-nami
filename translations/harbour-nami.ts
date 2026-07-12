@@ -228,6 +228,10 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Deleting %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation type="unfinished"></translation>
     </message>
@@ -464,6 +468,18 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Link to contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation type="unfinished"></translation>
@@ -774,6 +790,14 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Grid ×2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Scanned folders</source>
         <translation type="unfinished"></translation>

@@ -23,8 +23,8 @@ Page {
     // Sort mode: "name" or "photos"
     property string sortMode: "photos"
 
-    // Layout mode: "list" or "grid" (persisted in settings)
-    property bool gridMode: false
+    // Layout: 0 = list, otherwise number of grid columns (2 or 4)
+    property int gridColumns: 0
 
     // Statistics
     property int totalPeople: 0
@@ -33,7 +33,11 @@ Page {
 
     function reloadViewMode() {
         if (facePipeline && facePipeline.initialized) {
-            gridMode = facePipeline.getSetting("people_view_mode", "list") === "grid"
+            var mode = facePipeline.getSetting("people_view_mode", "list")
+            // "grid" is the legacy value for the 2-column grid
+            gridColumns = (mode === "grid4") ? 4
+                        : (mode === "grid2" || mode === "grid") ? 2
+                        : 0
         }
     }
 
@@ -111,15 +115,12 @@ Page {
     }
 
     function renamePerson(personId, name) {
-        var dialog = pageStack.push("Sailfish.Silica.InputDialog", {
-            acceptDestination: page,
-            acceptDestinationAction: PageStackAction.Pop,
-            title: qsTr("Rename Person"),
-            placeholderText: qsTr("Enter name"),
-            text: name
+        var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/RenamePersonDialog.qml"), {
+            personId: personId,
+            currentName: name
         })
         dialog.accepted.connect(function() {
-            facePipeline.updatePersonName(personId, dialog.value)
+            facePipeline.updatePersonName(personId, dialog.newName)
             refreshPeople()
         })
     }
@@ -141,11 +142,7 @@ Page {
     }
 
     function deletePerson(personId, name) {
-        var dialog = pageStack.push("Sailfish.Silica.RemorseDialog", {
-            title: qsTr("Delete person?"),
-            text: qsTr("This will remove %1 and unlink all their photos").arg(name)
-        })
-        dialog.accepted.connect(function() {
+        Remorse.popupAction(page, qsTr("Deleting %1").arg(name), function() {
             facePipeline.deletePerson(personId)
             refreshPeople()
         })
@@ -520,8 +517,11 @@ Page {
             model: filteredPeopleModel
             header: peopleHeader
 
-            cellWidth: width / 2
-            cellHeight: cellWidth + Theme.itemSizeSmall
+            property int columns: gridColumns > 0 ? gridColumns : 2
+            property bool dense: columns >= 4
+
+            cellWidth: width / columns
+            cellHeight: cellWidth + (dense ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall)
 
             PullDownMenu {
                 MenuItem { text: qsTr("About"); onClicked: openAbout() }
@@ -561,14 +561,14 @@ Page {
 
                 Column {
                     anchors.fill: parent
-                    anchors.margins: Theme.paddingMedium
+                    anchors.margins: grid.dense ? Theme.paddingSmall : Theme.paddingMedium
                     spacing: Theme.paddingSmall
 
                     Rectangle {
                         id: avatarFrame
                         width: parent.width
                         height: width
-                        radius: Theme.paddingMedium
+                        radius: grid.dense ? Theme.paddingSmall : Theme.paddingMedium
                         color: Theme.rgba(Theme.highlightBackgroundColor, 0.2)
                         clip: true
 
@@ -584,7 +584,7 @@ Page {
 
                         Image {
                             anchors.centerIn: parent
-                            source: "image://theme/icon-l-contact"
+                            source: grid.dense ? "image://theme/icon-m-contact" : "image://theme/icon-l-contact"
                             visible: gridAvatar.status !== Image.Ready
                             opacity: 0.4
                         }
@@ -596,8 +596,8 @@ Page {
                                 margins: Theme.paddingSmall
                             }
                             source: "image://theme/icon-s-contact"
-                            width: Theme.iconSizeSmall
-                            height: Theme.iconSizeSmall
+                            width: grid.dense ? Theme.iconSizeExtraSmall : Theme.iconSizeSmall
+                            height: width
                             visible: model.contact_id && model.contact_id.length > 0
                         }
                     }
@@ -606,7 +606,7 @@ Page {
                         width: parent.width
                         text: model.name || qsTr("Unknown")
                         color: Theme.primaryColor
-                        font.pixelSize: Theme.fontSizeSmall
+                        font.pixelSize: grid.dense ? Theme.fontSizeExtraSmall : Theme.fontSizeSmall
                         truncationMode: TruncationMode.Fade
                         horizontalAlignment: Text.AlignHCenter
                     }
@@ -629,6 +629,6 @@ Page {
     // Only one layout is instantiated at a time
     Loader {
         anchors.fill: parent
-        sourceComponent: gridMode ? gridLayout : listLayout
+        sourceComponent: gridColumns > 0 ? gridLayout : listLayout
     }
 }
