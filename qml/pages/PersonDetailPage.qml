@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import Nemo.DBus 2.0
 
 Page {
     id: page
@@ -14,6 +15,22 @@ Page {
     function loadContact() {
         if (faceManager && faceManager.initialized && personId >= 0) {
             contactId = faceManager.personContactId(personId)
+        }
+    }
+
+    // People app UI (Contacts permission grants talk access)
+    DBusInterface {
+        id: contactsUi
+        bus: DBus.SessionBus
+        service: "com.jolla.contacts.ui"
+        path: "/com/jolla/contacts/ui"
+        iface: "com.jolla.contacts.ui"
+    }
+
+    function openInContacts() {
+        var cid = parseInt(contactId)
+        if (cid > 0) {
+            contactsUi.typedCall("showContact", { "type": "i", "value": cid })
         }
     }
 
@@ -77,6 +94,11 @@ Page {
                     dialog.accepted.connect(function() {
                         facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
                         contactId = dialog.selectedContactId
+                        // Adopt the contact's name for the person
+                        if (dialog.selectedContactName.length > 0) {
+                            facePipeline.updatePersonName(personId, dialog.selectedContactName)
+                            personName = dialog.selectedContactName
+                        }
                     })
                 }
             }
@@ -141,6 +163,37 @@ Page {
                             color: Theme.secondaryColor
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
+                    }
+                }
+            }
+
+            // Linked contact indicator + shortcut to the People app
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeSmall
+                visible: contactId.length > 0 && facePipeline.contactsEnabled
+                onClicked: openInContacts()
+
+                Row {
+                    anchors {
+                        left: parent.left
+                        leftMargin: Theme.horizontalPageMargin
+                        right: parent.right
+                        rightMargin: Theme.horizontalPageMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                    spacing: Theme.paddingMedium
+
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "image://theme/icon-m-contact"
+                        color: Theme.highlightColor
+                    }
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Open in Contacts")
+                        color: Theme.highlightColor
                     }
                 }
             }

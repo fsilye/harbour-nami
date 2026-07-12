@@ -477,6 +477,10 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Open in Contacts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation type="unfinished"></translation>
     </message>

@@ -154,6 +154,10 @@ Page {
         })
         dialog.accepted.connect(function() {
             facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
+            // Adopt the contact's name for the linked person
+            if (dialog.selectedContactName.length > 0) {
+                facePipeline.updatePersonName(personId, dialog.selectedContactName)
+            }
             refreshPeople()
         })
     }

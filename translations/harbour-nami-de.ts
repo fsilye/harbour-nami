@@ -478,6 +478,10 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Open in Contacts</source>
+        <translation>In Kontakte öffnen</translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation>Mit Kontakt verknüpfen</translation>
     </message>

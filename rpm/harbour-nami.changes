@@ -1,3 +1,8 @@
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.7-1
+- Adopt the contact name when linking a person to a contact
+- Show a linked-contact indicator on the person page
+- Open the People app on the linked contact
+
 * Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.6-1
 - Link a face directly to a contact from the identify flow
 - Add a privacy toggle to disable contact reading entirely

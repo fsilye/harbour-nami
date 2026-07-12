@@ -478,6 +478,10 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Open in Contacts</source>
+        <translation>Avaa Yhteystiedoissa</translation>
+    </message>
+    <message>
         <source>Link to contact</source>
         <translation>Yhdistä yhteystietoon</translation>
     </message>
