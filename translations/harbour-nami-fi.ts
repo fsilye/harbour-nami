@@ -141,6 +141,14 @@
 <context>
     <name>IdentifyFaceDialog</name>
     <message>
+        <source>Link to a contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Tai luo henkilö vain sovellukseen:</translation>
+    </message>
+    <message>
         <source>Cancel</source>
         <translation>Peruuta</translation>
     </message>
@@ -757,6 +765,14 @@
 <context>
     <name>SelectPersonDialog</name>
     <message>
+        <source>Link to a contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Tai luo henkilö vain sovellukseen:</translation>
+    </message>
+    <message>
         <source>Cancel</source>
         <translation>Peruuta</translation>
     </message>
@@ -795,6 +811,14 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Contacts integration</source>
+        <translation>Yhteystietojen integrointi</translation>
+    </message>
+    <message>
+        <source>Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.</source>
+        <translation>Voit yhdistää henkilöitä laitteen yhteystietoihin. Pois päältä Nami ei koskaan lue yhteystietojasi, vaikka lupa on myönnetty.</translation>
+    </message>
     <message>
         <source>Grid ×2</source>
         <translation>Ruudukko ×2</translation>

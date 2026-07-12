@@ -1,3 +1,7 @@
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.6-1
+- Link a face directly to a contact from the identify flow
+- Add a privacy toggle to disable contact reading entirely
+
 * Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.5-1
 - Add Privileged permission so contact linking can read the address book
 

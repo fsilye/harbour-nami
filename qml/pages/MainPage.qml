@@ -452,7 +452,7 @@ Page {
                                 source: "image://theme/icon-m-contact"
                                 width: Theme.iconSizeExtraSmall
                                 height: Theme.iconSizeExtraSmall
-                                visible: model.contact_id && model.contact_id.length > 0
+                                visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
                                 opacity: 0.6
                             }
                         }
@@ -476,11 +476,12 @@ Page {
                         text: (model.contact_id && model.contact_id.length > 0)
                               ? qsTr("Change linked contact")
                               : qsTr("Link to contact")
+                        visible: facePipeline.contactsEnabled
                         onClicked: linkContact(model.person_id, model.name)
                     }
                     MenuItem {
                         text: qsTr("Unlink contact")
-                        visible: model.contact_id && model.contact_id.length > 0
+                        visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
                         onClicked: unlinkContact(model.person_id)
                     }
                     MenuItem {
@@ -598,7 +599,7 @@ Page {
                             source: "image://theme/icon-m-contact"
                             width: grid.dense ? Theme.iconSizeExtraSmall : Theme.iconSizeSmall
                             height: width
-                            visible: model.contact_id && model.contact_id.length > 0
+                            visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
                         }
                     }
 

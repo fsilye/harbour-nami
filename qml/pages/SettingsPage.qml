@@ -80,6 +80,15 @@ Page {
                 text: qsTr("All face recognition processing happens locally on your device. No data is sent to external servers.")
             }
 
+            TextSwitch {
+                text: qsTr("Contacts integration")
+                description: qsTr("Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.")
+                enabled: facePipeline && facePipeline.initialized
+                automaticCheck: false
+                checked: facePipeline && facePipeline.contactsEnabled
+                onClicked: facePipeline.contactsEnabled = !facePipeline.contactsEnabled
+            }
+
             SectionHeader {
                 text: qsTr("Scanned folders")
             }

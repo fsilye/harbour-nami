@@ -12,14 +12,21 @@ Dialog {
     property var faceManager: facePipeline
     property int selectedPersonId: -1
     property bool createNew: true  // Default to creating new person
+    // Set when the user picks a device contact: a person named after the
+    // contact is created and linked in one step
+    property string pendingContactId: ""
+    property string pendingContactName: ""
 
-    canAccept: (selectedPersonId > 0) || (createNew && newNameField.text.trim().length > 0)
+    canAccept: (pendingContactId.length > 0) || (selectedPersonId > 0)
+               || (createNew && newNameField.text.trim().length > 0)
 
     onAccepted: {
-        if (createNew) {
-            // Create new person from face
-            var newName = newNameField.text.trim()
-            facePipeline.identifyFace(faceId, -1, newName)
+        if (pendingContactId.length > 0) {
+            // Create a person from the contact and link it in one step
+            facePipeline.identifyFace(faceId, -1, pendingContactName, pendingContactId)
+        } else if (createNew) {
+            // Create new app-only person from face
+            facePipeline.identifyFace(faceId, -1, newNameField.text.trim())
         } else if (selectedPersonId > 0) {
             // Assign to existing person
             facePipeline.identifyFace(faceId, selectedPersonId, "")
@@ -114,10 +121,38 @@ Dialog {
                 }
             }
 
-            // Create new person (default)
+            // Link directly to a device contact (creates a person named
+            // after the contact and links it in one step)
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Link to a contact")
+                visible: facePipeline.contactsEnabled
+                onClicked: {
+                    var cd = pageStack.push(Qt.resolvedUrl("SelectContactDialog.qml"), {})
+                    cd.accepted.connect(function() {
+                        if (cd.selectedContactId.length > 0) {
+                            pendingContactId = cd.selectedContactId
+                            pendingContactName = cd.selectedContactName
+                            dialog.accept()
+                        }
+                    })
+                }
+            }
+
+            // Or create an app-only person (default)
             Item {
                 width: parent.width
                 height: Theme.paddingMedium
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("Or create a person only in the app:")
+                color: Theme.secondaryHighlightColor
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.WordWrap
+                visible: facePipeline.contactsEnabled
             }
 
             TextField {

@@ -141,6 +141,14 @@
 <context>
     <name>IdentifyFaceDialog</name>
     <message>
+        <source>Link to a contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>O crea una persona solo en la app:</translation>
+    </message>
+    <message>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
@@ -757,6 +765,14 @@
 <context>
     <name>SelectPersonDialog</name>
     <message>
+        <source>Link to a contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>O crea una persona solo en la app:</translation>
+    </message>
+    <message>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
@@ -795,6 +811,14 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Contacts integration</source>
+        <translation>Integración de contactos</translation>
+    </message>
+    <message>
+        <source>Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.</source>
+        <translation>Permite vincular personas a los contactos del dispositivo. Si está desactivado, Nami nunca lee tus contactos, aunque el permiso esté concedido.</translation>
+    </message>
     <message>
         <source>Grid ×2</source>
         <translation>Cuadrícula ×2</translation>

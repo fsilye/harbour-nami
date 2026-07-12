@@ -69,6 +69,7 @@ Page {
             }
             MenuItem {
                 text: contactId.length > 0 ? qsTr("Change linked contact") : qsTr("Link to contact")
+                visible: facePipeline.contactsEnabled
                 onClicked: {
                     var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectContactDialog.qml"), {
                         personName: personName
@@ -81,7 +82,7 @@ Page {
             }
             MenuItem {
                 text: qsTr("Unlink contact")
-                visible: contactId.length > 0
+                visible: facePipeline.contactsEnabled && contactId.length > 0
                 onClicked: {
                     facePipeline.linkPersonToContact(personId, "")
                     contactId = ""

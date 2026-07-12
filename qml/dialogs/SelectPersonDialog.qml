@@ -16,10 +16,16 @@ Dialog {
     property bool allowCreate: true
     property int excludePersonId: -1
 
-    canAccept: (selectedPersonId > 0) || (createNew && allowCreate && newNameField.text.trim().length > 0)
+    // Opt-in device-contact linking (identify flow only, not merge)
+    property bool allowContact: false
+    property string selectedContactId: ""
+    property string selectedContactName: ""
+
+    canAccept: (selectedContactId.length > 0) || (selectedPersonId > 0)
+               || (createNew && allowCreate && newNameField.text.trim().length > 0)
 
     onAccepted: {
-        if (createNew && allowCreate) {
+        if (createNew && allowCreate && selectedContactId.length === 0) {
             personName = newNameField.text.trim()
         }
     }
@@ -49,6 +55,34 @@ Dialog {
             Item {
                 width: parent.width
                 height: Theme.paddingMedium
+            }
+
+            // Link directly to a device contact (creates a person named
+            // after the contact and links it in one step)
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Link to a contact")
+                visible: allowContact && facePipeline.contactsEnabled
+                onClicked: {
+                    var cd = pageStack.push(Qt.resolvedUrl("SelectContactDialog.qml"), {})
+                    cd.accepted.connect(function() {
+                        if (cd.selectedContactId.length > 0) {
+                            selectedContactId = cd.selectedContactId
+                            selectedContactName = cd.selectedContactName
+                            dialog.accept()
+                        }
+                    })
+                }
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("Or create a person only in the app:")
+                color: Theme.secondaryHighlightColor
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.WordWrap
+                visible: allowContact && allowCreate && facePipeline.contactsEnabled
             }
 
             // New person input

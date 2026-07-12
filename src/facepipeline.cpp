@@ -22,6 +22,7 @@ FacePipeline::FacePipeline(QObject *parent)
     , m_processing(false)
     , m_cancelRequested(false)
     , m_needsRescan(false)
+    , m_contactsEnabled(true)
     , m_currentScanIsForced(false)
     , m_totalPhotos(0)
     , m_processedPhotos(0)
@@ -73,6 +74,10 @@ bool FacePipeline::initialize(const QString &detectorModelPath,
         emit error("Failed to open database");
         return false;
     }
+
+    // Privacy switch for contact reading (defaults to enabled)
+    m_contactsEnabled = m_database->getSetting("contacts_enabled", "true") != "false";
+    emit contactsEnabledChanged();
 
     // User-tuned matching threshold
     bool thresholdOk = false;
@@ -449,6 +454,10 @@ bool FacePipeline::identifyFace(int faceId, int personId, const QString &personN
             emit error("Failed to create person");
             return false;
         }
+        // Optionally link the freshly created person to a device contact
+        if (!contactId.isEmpty()) {
+            m_database->setPersonContact(personId, contactId);
+        }
     }
 
     // Update face mapping
@@ -739,6 +748,19 @@ QString FacePipeline::personContactId(int personId)
     }
 
     return m_database->getPerson(personId).contactId;
+}
+
+void FacePipeline::setContactsEnabled(bool enabled)
+{
+    if (m_contactsEnabled == enabled) {
+        return;
+    }
+
+    m_contactsEnabled = enabled;
+    if (m_database) {
+        m_database->setSetting("contacts_enabled", enabled ? "true" : "false");
+    }
+    emit contactsEnabledChanged();
 }
 
 bool FacePipeline::mergePersons(int fromPersonId, int intoPersonId)
