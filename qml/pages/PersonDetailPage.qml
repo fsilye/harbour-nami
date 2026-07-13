@@ -92,12 +92,46 @@ Page {
                         personName: personName
                     })
                     dialog.accepted.connect(function() {
-                        facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
-                        contactId = dialog.selectedContactId
-                        // Adopt the contact's name for the person
-                        if (dialog.selectedContactName.length > 0) {
-                            facePipeline.updatePersonName(personId, dialog.selectedContactName)
-                            personName = dialog.selectedContactName
+                        // Same contact already linked to another person:
+                        // most likely duplicates, offer to merge
+                        var existingId = -1
+                        var existingName = ""
+                        var people = facePipeline.getAllPeople()
+                        for (var i = 0; i < people.length; i++) {
+                            if (people[i].contact_id === dialog.selectedContactId
+                                    && people[i].person_id !== personId) {
+                                existingId = people[i].person_id
+                                existingName = people[i].name
+                                break
+                            }
+                        }
+
+                        if (existingId > 0) {
+                            pageStack.completeAnimation()
+                            var confirm = pageStack.push(Qt.resolvedUrl("../dialogs/ConfirmDialog.qml"), {
+                                title: qsTr("Merge duplicates?"),
+                                message: qsTr("%1 is already linked to this contact. Merge %2 into %1?").arg(existingName).arg(personName)
+                            })
+                            confirm.accepted.connect(function() {
+                                facePipeline.mergePersons(personId, existingId)
+                                pageStack.pop()
+                            })
+                            confirm.rejected.connect(function() {
+                                facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
+                                contactId = dialog.selectedContactId
+                                if (dialog.selectedContactName.length > 0) {
+                                    facePipeline.updatePersonName(personId, dialog.selectedContactName)
+                                    personName = dialog.selectedContactName
+                                }
+                            })
+                        } else {
+                            facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
+                            contactId = dialog.selectedContactId
+                            // Adopt the contact's name for the person
+                            if (dialog.selectedContactName.length > 0) {
+                                facePipeline.updatePersonName(personId, dialog.selectedContactName)
+                                personName = dialog.selectedContactName
+                            }
                         }
                     })
                 }

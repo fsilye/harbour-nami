@@ -173,6 +173,35 @@ Page {
                 }
             }
 
+            Slider {
+                width: parent.width
+                label: qsTr("Memories time window")
+                minimumValue: 1
+                maximumValue: 45
+                stepSize: 1
+                valueText: value + " " + qsTr("days")
+                enabled: facePipeline && facePipeline.initialized
+
+                Component.onCompleted: {
+                    if (facePipeline && facePipeline.initialized) {
+                        value = parseInt(facePipeline.getSetting("memories_window_days", "20"))
+                    }
+                }
+
+                onReleased: {
+                    facePipeline.setSetting("memories_window_days", Math.round(value).toString())
+                }
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: qsTr("Memories show photos taken within this many days around today's date in previous years")
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.secondaryColor
+                wrapMode: Text.WordWrap
+            }
+
             SectionHeader {
                 text: qsTr("Scanning")
             }

@@ -267,6 +267,14 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>Duplikate zusammenführen?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ist bereits mit diesem Kontakt verknüpft. %2 in %1 zusammenführen?</translation>
+    </message>
+    <message>
         <source>Deleting %1</source>
         <translation>%1 wird gelöscht</translation>
     </message>
@@ -512,6 +520,14 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>Duplikate zusammenführen?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ist bereits mit diesem Kontakt verknüpft. %2 in %1 zusammenführen?</translation>
+    </message>
+    <message>
         <source>Open in Contacts</source>
         <translation>In Kontakte öffnen</translation>
     </message>
@@ -655,6 +671,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Alle Fotos wurden automatisch diesen Personen zugeordnet:</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -849,6 +869,18 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Zeitfenster für Erinnerungen</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>Tage</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>Erinnerungen zeigen Fotos, die innerhalb dieser Anzahl von Tagen um das heutige Datum in früheren Jahren aufgenommen wurden</translation>
+    </message>
     <message>
         <source>Contacts integration</source>
         <translation>Kontakte-Integration</translation>

@@ -24,6 +24,8 @@ Dialog {
         id: listView
         anchors.fill: parent
         model: contactsModel
+        // Keep the view from grabbing focus away from the search field
+        currentIndex: -1
 
         header: Column {
             width: listView.width

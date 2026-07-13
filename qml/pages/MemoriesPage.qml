@@ -14,12 +14,15 @@ Page {
     }
 
     Component.onCompleted: {
+        if (faceManager && faceManager.initialized) {
+            windowDays = parseInt(faceManager.getSetting("memories_window_days", "20"))
+        }
         detectMemories()
     }
 
     // Days to look around today's date: exact-day matching almost never
-    // fires, a window makes memories actually show up
-    readonly property int windowDays: 20
+    // fires, a window makes memories actually show up (user-tunable)
+    property int windowDays: 20
 
     // Circular distance in days between a photo's month/day and today's,
     // ignoring the year (so Dec 30 is 3 days from Jan 2)

@@ -1,3 +1,10 @@
+* Mon Jul 13 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.9-1
+- Offer to merge duplicates when linking a contact already linked to someone
+- Full context menu on long press in grid layout
+- Fix search fields losing focus on every keystroke
+- Scan results: unknown faces action moved to the top, message when all matched
+- Memories time window is now a setting (1-45 days)
+
 * Mon Jul 13 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.8-1
 - Fix events showing 0 photos; tapping an event now opens its photos
 - Memories match a 7-day window and open a polaroid-style photo spread

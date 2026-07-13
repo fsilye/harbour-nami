@@ -267,6 +267,14 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>Unire i duplicati?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 è già collegato a questo contatto. Unire %2 in %1?</translation>
+    </message>
+    <message>
         <source>Deleting %1</source>
         <translation>Eliminazione di %1</translation>
     </message>
@@ -512,6 +520,14 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>Unire i duplicati?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 è già collegato a questo contatto. Unire %2 in %1?</translation>
+    </message>
+    <message>
         <source>Open in Contacts</source>
         <translation>Apri in Contatti</translation>
     </message>
@@ -655,6 +671,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Tutte le foto sono state associate automaticamente a queste persone:</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -849,6 +869,18 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Finestra dei ricordi</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>giorni</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>I ricordi mostrano le foto scattate entro questo numero di giorni intorno alla data odierna negli anni passati</translation>
+    </message>
     <message>
         <source>Contacts integration</source>
         <translation>Integrazione contatti</translation>

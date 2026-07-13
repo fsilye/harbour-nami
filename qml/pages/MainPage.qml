@@ -70,8 +70,6 @@ Page {
 
     // Filter and sort people
     function filterAndSort() {
-        filteredPeopleModel.clear()
-
         // Collect filtered items
         var items = []
         for (var i = 0; i < peopleModel.count; i++) {
@@ -99,9 +97,17 @@ Page {
             })
         }
 
-        // Populate filtered model
+        // Update the model in place: clear()+append resets the view on
+        // every keystroke and steals focus from the search field
         for (var j = 0; j < items.length; j++) {
-            filteredPeopleModel.append(items[j])
+            if (j < filteredPeopleModel.count) {
+                filteredPeopleModel.set(j, items[j])
+            } else {
+                filteredPeopleModel.append(items[j])
+            }
+        }
+        while (filteredPeopleModel.count > items.length) {
+            filteredPeopleModel.remove(filteredPeopleModel.count - 1)
         }
     }
 
@@ -148,17 +154,49 @@ Page {
         })
     }
 
+    function applyContactLink(personId, contactId, contactName) {
+        facePipeline.linkPersonToContact(personId, contactId)
+        // Adopt the contact's name for the linked person
+        if (contactName.length > 0) {
+            facePipeline.updatePersonName(personId, contactName)
+        }
+        refreshPeople()
+    }
+
     function linkContact(personId, name) {
         var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectContactDialog.qml"), {
             personName: name
         })
         dialog.accepted.connect(function() {
-            facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
-            // Adopt the contact's name for the linked person
-            if (dialog.selectedContactName.length > 0) {
-                facePipeline.updatePersonName(personId, dialog.selectedContactName)
+            // Same contact already linked to another person: these are most
+            // likely duplicates of the same human, offer to merge them
+            var existingId = -1
+            var existingName = ""
+            for (var i = 0; i < peopleModel.count; i++) {
+                var p = peopleModel.get(i)
+                if (p.contact_id === dialog.selectedContactId && p.person_id !== personId) {
+                    existingId = p.person_id
+                    existingName = p.name
+                    break
+                }
             }
-            refreshPeople()
+
+            if (existingId > 0) {
+                pageStack.completeAnimation()
+                var confirm = pageStack.push(Qt.resolvedUrl("../dialogs/ConfirmDialog.qml"), {
+                    title: qsTr("Merge duplicates?"),
+                    message: qsTr("%1 is already linked to this contact. Merge %2 into %1?").arg(existingName).arg(name)
+                })
+                confirm.accepted.connect(function() {
+                    facePipeline.mergePersons(personId, existingId)
+                    refreshPeople()
+                })
+                confirm.rejected.connect(function() {
+                    applyContactLink(personId, dialog.selectedContactId, dialog.selectedContactName)
+                })
+            } else {
+                applyContactLink(personId, dialog.selectedContactId, dialog.selectedContactName)
+            }
         })
     }
 
@@ -338,8 +376,9 @@ Page {
                 width: parent.width
                 placeholderText: qsTr("Search people")
                 visible: totalPeople > 0
-                text: searchQuery
 
+                // One-way binding only: writing text back while typing
+                // breaks keyboard composition and defocuses the field
                 onTextChanged: {
                     searchQuery = text
                     filterAndSort()
@@ -365,6 +404,8 @@ Page {
             anchors.fill: parent
             model: filteredPeopleModel
             header: peopleHeader
+            // Keep the view from grabbing focus away from the search field
+            currentIndex: -1
 
             PullDownMenu {
                 MenuItem { text: qsTr("About"); onClicked: openAbout() }
@@ -527,6 +568,8 @@ Page {
             anchors.fill: parent
             model: filteredPeopleModel
             header: peopleHeader
+            // Keep the view from grabbing focus away from the search field
+            currentIndex: -1
 
             property int columns: gridColumns > 0 ? gridColumns : 2
             property bool dense: columns >= 4
@@ -566,9 +609,38 @@ Page {
                 }
             }
 
-            delegate: BackgroundItem {
+            delegate: ListItem {
                 width: grid.cellWidth
-                height: grid.cellHeight
+                contentHeight: grid.cellHeight
+
+                // Same context menu as the list layout (long press)
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Rename")
+                        onClicked: renamePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: (model.contact_id && model.contact_id.length > 0)
+                              ? qsTr("Change linked contact")
+                              : qsTr("Link to contact")
+                        visible: facePipeline.contactsEnabled
+                        onClicked: linkContact(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Unlink contact")
+                        visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
+                        onClicked: unlinkContact(model.person_id)
+                    }
+                    MenuItem {
+                        text: qsTr("Merge into...")
+                        visible: peopleModel.count > 1
+                        onClicked: mergePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Delete")
+                        onClicked: deletePerson(model.person_id, model.name)
+                    }
+                }
 
                 Column {
                     anchors.fill: parent
@@ -635,7 +707,6 @@ Page {
                 }
 
                 onClicked: openPerson(model.person_id, model.name)
-                onPressAndHold: renamePerson(model.person_id, model.name)
             }
 
             ViewPlaceholder {

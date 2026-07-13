@@ -266,6 +266,14 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Deleting %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -511,6 +519,14 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Open in Contacts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -654,6 +670,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation type="unfinished">
@@ -848,6 +868,18 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Contacts integration</source>
         <translation type="unfinished"></translation>

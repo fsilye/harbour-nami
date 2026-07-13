@@ -267,6 +267,14 @@
 <context>
     <name>MainPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>¿Fusionar duplicados?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ya está vinculado a este contacto. ¿Fusionar %2 en %1?</translation>
+    </message>
+    <message>
         <source>Deleting %1</source>
         <translation>Eliminando %1</translation>
     </message>
@@ -512,6 +520,14 @@
 <context>
     <name>PersonDetailPage</name>
     <message>
+        <source>Merge duplicates?</source>
+        <translation>¿Fusionar duplicados?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ya está vinculado a este contacto. ¿Fusionar %2 en %1?</translation>
+    </message>
+    <message>
         <source>Open in Contacts</source>
         <translation>Abrir en Contactos</translation>
     </message>
@@ -655,6 +671,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Todas las fotos se han asociado automáticamente a estas personas:</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -849,6 +869,18 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Ventana de recuerdos</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>días</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>Los recuerdos muestran fotos tomadas dentro de este número de días alrededor de la fecha de hoy en años anteriores</translation>
+    </message>
     <message>
         <source>Contacts integration</source>
         <translation>Integración de contactos</translation>
