@@ -86,6 +86,11 @@ int main(int argc, char *argv[])
     view->rootContext()->setContextProperty("appDataDir", dataDir);
     view->rootContext()->setContextProperty("appCacheDir", cacheDir);
     view->rootContext()->setContextProperty("defaultGalleryPath", picturesDir);
+#ifdef APP_VERSION
+    view->rootContext()->setContextProperty("appVersion", QStringLiteral(APP_VERSION));
+#else
+    view->rootContext()->setContextProperty("appVersion", QStringLiteral("dev"));
+#endif
 
     // Set QML source
     view->setSource(QUrl::fromLocalFile(appDir + "/qml/harbour-nami.qml"));

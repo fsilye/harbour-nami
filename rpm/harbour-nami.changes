@@ -1,3 +1,45 @@
+* Mon Jul 13 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.8.0-1
+- About page: app logo, dynamic version, updated feature list
+- Version bump consolidating all 0.7.x changes since the 0.7.1 release
+
+* Mon Jul 13 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.9-1
+- Offer to merge duplicates when linking a contact already linked to someone
+- Full context menu on long press in grid layout
+- Fix search fields losing focus on every keystroke
+- Scan results: unknown faces action moved to the top, message when all matched
+- Memories time window is now a setting (1-45 days)
+
+* Mon Jul 13 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.8-1
+- Fix events showing 0 photos; tapping an event now opens its photos
+- Memories match a 7-day window and open a polaroid-style photo spread
+- Honor EXIF orientation everywhere; add persisted manual photo rotation
+- Grid layout: square face tiles without colored halo, subtler contact badge
+- Fix people list not refreshing after deleting from the person page
+
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.7-1
+- Adopt the contact name when linking a person to a contact
+- Show a linked-contact indicator on the person page
+- Open the People app on the linked contact
+
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.6-1
+- Link a face directly to a contact from the identify flow
+- Add a privacy toggle to disable contact reading entirely
+
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.5-1
+- Add Privileged permission so contact linking can read the address book
+
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.4-1
+- Fix invalid contact icons failing to render
+- Fix contact search field binding in the link dialog
+- Show a loading indicator while contacts load
+
+* Sun Jul 12 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.3-1
+- List, grid x2 and grid x4 layouts for people
+- Scan folders whitelist with SD card (RemovableMedia) support
+- Link people to device contacts
+- Fix rename and delete dialogs failing to load
+- Fix remove-from-person not persisting across launches
+
 * Sun Jul 05 2026 Nicolas Souveton <souvetonnicolas@gmail.com> 0.7.0-1
 - Complete translations (fr, de, it, es, fi)
 - EXIF capture dates for Events and Memories

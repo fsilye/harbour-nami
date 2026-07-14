@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(harbour-nami VERSION 0.7.0 LANGUAGES CXX)
+project(harbour-nami VERSION 0.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -72,6 +72,9 @@ add_executable(${PROJECT_NAME}
     ${SOURCES}
     ${HEADERS}
 )
+
+# App version shown in the About page (single source: project() above)
+target_compile_definitions(${PROJECT_NAME} PRIVATE APP_VERSION="${PROJECT_VERSION}")
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE

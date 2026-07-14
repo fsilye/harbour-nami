@@ -4,6 +4,38 @@
 <context>
     <name>AboutPage</name>
     <message>
+        <source>100% on-device processing, no internet required</source>
+        <translation>100 % paikallinen käsittely, ei internet-yhteyttä</translation>
+    </message>
+    <message>
+        <source>Automatic face detection and recognition</source>
+        <translation>Automaattinen kasvojen tunnistus</translation>
+    </message>
+    <message>
+        <source>People gallery in list or grid layout</source>
+        <translation>Henkilögalleria luettelona tai ruudukkona</translation>
+    </message>
+    <message>
+        <source>Link people to your device contacts</source>
+        <translation>Henkilöiden yhdistäminen yhteystietoihin</translation>
+    </message>
+    <message>
+        <source>Events grouped by day</source>
+        <translation>Tapahtumat ryhmiteltyinä päivittäin</translation>
+    </message>
+    <message>
+        <source>Memories from previous years</source>
+        <translation>Muistoja aiemmilta vuosilta</translation>
+    </message>
+    <message>
+        <source>Scan folders of your choice, SD card included</source>
+        <translation>Valitsemiesi kansioiden skannaus, myös SD-kortti</translation>
+    </message>
+    <message>
+        <source>Data export and full deletion (GDPR)</source>
+        <translation>Tietojen vienti ja täydellinen poisto (GDPR)</translation>
+    </message>
+    <message>
         <source>100% on-device processing</source>
         <translation>Käsittely 100 % laitteella</translation>
     </message>
@@ -105,6 +137,36 @@
     </message>
 </context>
 <context>
+    <name>DayPhotosPage</name>
+    <message>
+        <source>photo</source>
+        <translation>kuva</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>kuvaa</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Ei kuvia</translation>
+    </message>
+</context>
+<context>
+    <name>MemoryDetailPage</name>
+    <message>
+        <source>photo</source>
+        <translation>kuva</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>kuvaa</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Ei kuvia</translation>
+    </message>
+</context>
+<context>
     <name>EventsPage</name>
     <message>
         <source>Events</source>
@@ -140,6 +202,14 @@
 </context>
 <context>
     <name>IdentifyFaceDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Tai luo henkilö vain sovellukseen:</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Peruuta</translation>
@@ -228,6 +298,30 @@
 </context>
 <context>
     <name>MainPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>Yhdistetäänkö kaksoiskappaleet?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 on jo yhdistetty tähän yhteystietoon. Yhdistetäänkö %2 henkilöön %1?</translation>
+    </message>
+    <message>
+        <source>Deleting %1</source>
+        <translation>Poistetaan %1</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Vaihda yhdistettyä yhteystietoa</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Poista yhteystiedon linkitys</translation>
+    </message>
     <message>
         <source>About</source>
         <translation>Tietoja</translation>
@@ -352,6 +446,10 @@
 <context>
     <name>MemoriesPage</name>
     <message>
+        <source>Photos from around this time in previous years</source>
+        <translation>Kuvia tältä ajalta aiempina vuosina</translation>
+    </message>
+    <message>
         <source> year ago</source>
         <translation> vuosi sitten</translation>
     </message>
@@ -453,6 +551,30 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>Yhdistetäänkö kaksoiskappaleet?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 on jo yhdistetty tähän yhteystietoon. Yhdistetäänkö %2 henkilöön %1?</translation>
+    </message>
+    <message>
+        <source>Open in Contacts</source>
+        <translation>Avaa Yhteystiedoissa</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Vaihda yhdistettyä yhteystietoa</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Poista yhteystiedon linkitys</translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation>Vahvista kaikki osumat</translation>
@@ -581,6 +703,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Kaikki kuvat liitettiin automaattisesti näihin henkilöihin:</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -688,7 +814,54 @@
     </message>
 </context>
 <context>
+    <name>SelectContactDialog</name>
+    <message>
+        <source>Your address book appears to be empty</source>
+        <translation>Osoitekirjasi vaikuttaa tyhjältä</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Yhdistä</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Peruuta</translation>
+    </message>
+    <message>
+        <source>Link %1 to a contact</source>
+        <translation>Yhdistä %1 yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Search contacts</source>
+        <translation>Hae yhteystietoja</translation>
+    </message>
+    <message>
+        <source>Unnamed contact</source>
+        <translation>Nimetön yhteystieto</translation>
+    </message>
+    <message>
+        <source>No contacts</source>
+        <translation>Ei yhteystietoja</translation>
+    </message>
+    <message>
+        <source>No contact matches your search</source>
+        <translation>Yksikään yhteystieto ei vastaa hakuasi</translation>
+    </message>
+</context>
+<context>
     <name>SelectPersonDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Yhdistä yhteystietoon</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Tai luo henkilö vain sovellukseen:</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Peruuta</translation>
@@ -728,6 +901,66 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Muistojen aikaikkuna</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>päivää</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>Muistot näyttävät kuvia, jotka on otettu näin monen päivän sisällä tämän päivän ympärillä aiempina vuosina</translation>
+    </message>
+    <message>
+        <source>Contacts integration</source>
+        <translation>Yhteystietojen integrointi</translation>
+    </message>
+    <message>
+        <source>Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.</source>
+        <translation>Voit yhdistää henkilöitä laitteen yhteystietoihin. Pois päältä Nami ei koskaan lue yhteystietojasi, vaikka lupa on myönnetty.</translation>
+    </message>
+    <message>
+        <source>Grid ×2</source>
+        <translation>Ruudukko ×2</translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation>Ruudukko ×4</translation>
+    </message>
+    <message>
+        <source>Scanned folders</source>
+        <translation>Skannatut kansiot</translation>
+    </message>
+    <message>
+        <source>Nami only scans the folders listed here. Add a folder on the SD card to include external photos.</source>
+        <translation>Nami skannaa vain tässä luetellut kansiot. Lisää kansio SD-kortilta ottaaksesi mukaan ulkoiset kuvat.</translation>
+    </message>
+    <message>
+        <source>Add folder</source>
+        <translation>Lisää kansio</translation>
+    </message>
+    <message>
+        <source>Display</source>
+        <translation>Näyttö</translation>
+    </message>
+    <message>
+        <source>People layout</source>
+        <translation>Henkilöiden asettelu</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Luettelo</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Ruudukko</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Poista</translation>
+    </message>
     <message>
         <source>All face recognition processing happens locally on your device. No data is sent to external servers.</source>
         <translation>Kaikki kasvontunnistus tapahtuu paikallisesti laitteellasi. Tietoja ei lähetetä ulkoisille palvelimille.</translation>

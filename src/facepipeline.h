@@ -66,6 +66,9 @@ class FacePipeline : public QObject
     Q_PROPERTY(int totalPhotos READ totalPhotos NOTIFY totalPhotosChanged)
     Q_PROPERTY(int processedPhotos READ processedPhotos NOTIFY processedPhotosChanged)
     Q_PROPERTY(bool needsRescan READ needsRescan NOTIFY needsRescanChanged)
+    // Privacy switch: when false the app never reads device contacts, even
+    // though the Contacts permission is granted (persisted setting)
+    Q_PROPERTY(bool contactsEnabled READ contactsEnabled WRITE setContactsEnabled NOTIFY contactsEnabledChanged)
 
 public:
     // Bump when embedding computation changes (model, alignment,
@@ -109,6 +112,16 @@ public:
                                  bool forceRescan = false);
 
     /**
+     * @brief Scan several gallery folders in one pass
+     *
+     * Same behaviour as scanGallery but accumulates image files across all
+     * given folders (deduplicated). Used by the folder whitelist so the SD
+     * card and internal storage can be scanned together.
+     */
+    Q_INVOKABLE void scanGalleries(const QStringList &galleryPaths, bool recursive = true,
+                                   bool forceRescan = false);
+
+    /**
      * @brief Process a single photo
      * @param photoPath Path to photo file
      * @return Processing result
@@ -128,7 +141,8 @@ public:
      * @param personId Person ID (or -1 to create new person)
      * @param personName Name for new person (if personId == -1)
      */
-    Q_INVOKABLE bool identifyFace(int faceId, int personId, const QString &personName = QString());
+    Q_INVOKABLE bool identifyFace(int faceId, int personId, const QString &personName = QString(),
+                                  const QString &contactId = QString());
 
     /**
      * @brief Cancel current operation
@@ -172,6 +186,27 @@ public:
     Q_INVOKABLE bool updatePersonName(int personId, const QString &name);
 
     /**
+     * @brief Link (or unlink with empty id) a person to a device contact
+     * @return true if successful
+     */
+    Q_INVOKABLE bool linkPersonToContact(int personId, const QString &contactId);
+
+    /**
+     * @brief Contact id linked to a person, empty when none
+     */
+    Q_INVOKABLE QString personContactId(int personId);
+
+    /**
+     * @brief User-applied rotation for a photo (degrees, 0 when none)
+     */
+    Q_INVOKABLE int photoRotation(const QString &photoPath);
+
+    /**
+     * @brief Persist a user-applied rotation for a photo
+     */
+    Q_INVOKABLE bool setPhotoRotation(const QString &photoPath, int rotation);
+
+    /**
      * @brief Merge one person into another
      *
      * All faces of fromPersonId are reassigned to intoPersonId and
@@ -200,6 +235,12 @@ public:
      * @return true if successful
      */
     Q_INVOKABLE bool removeFaceFromPerson(int faceId);
+
+    /**
+     * @brief Detach a person from a whole photo (all their faces in it)
+     * @return true if successful
+     */
+    Q_INVOKABLE bool removePersonFromPhoto(int personId, int photoId);
 
     /**
      * @brief Permanently ignore a face (false positive, stranger, low quality)
@@ -249,6 +290,8 @@ public:
 
     bool isInitialized() const { return m_initialized; }
     bool isProcessing() const { return m_processing; }
+    bool contactsEnabled() const { return m_contactsEnabled; }
+    void setContactsEnabled(bool enabled);
     int totalPhotos() const { return m_totalPhotos; }
     int processedPhotos() const { return m_processedPhotos; }
     bool needsRescan() const { return m_needsRescan; }
@@ -259,6 +302,7 @@ signals:
     void totalPhotosChanged();
     void processedPhotosChanged();
     void needsRescanChanged();
+    void contactsEnabledChanged();
 
     void scanStarted(int totalPhotos);
     void scanProgress(int current, int total, const QString &currentFile);
@@ -278,6 +322,7 @@ private:
     bool m_processing;
     bool m_cancelRequested;
     bool m_needsRescan;
+    bool m_contactsEnabled;
     bool m_currentScanIsForced;
     int m_totalPhotos;
     int m_processedPhotos;

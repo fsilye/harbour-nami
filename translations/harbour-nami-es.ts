@@ -4,6 +4,38 @@
 <context>
     <name>AboutPage</name>
     <message>
+        <source>100% on-device processing, no internet required</source>
+        <translation>Procesamiento 100 % en el dispositivo, sin conexión necesaria</translation>
+    </message>
+    <message>
+        <source>Automatic face detection and recognition</source>
+        <translation>Detección y reconocimiento automático de caras</translation>
+    </message>
+    <message>
+        <source>People gallery in list or grid layout</source>
+        <translation>Galería de personas en lista o cuadrícula</translation>
+    </message>
+    <message>
+        <source>Link people to your device contacts</source>
+        <translation>Vinculación de personas a tus contactos</translation>
+    </message>
+    <message>
+        <source>Events grouped by day</source>
+        <translation>Eventos agrupados por día</translation>
+    </message>
+    <message>
+        <source>Memories from previous years</source>
+        <translation>Recuerdos de años anteriores</translation>
+    </message>
+    <message>
+        <source>Scan folders of your choice, SD card included</source>
+        <translation>Análisis de las carpetas que elijas, incluida la tarjeta SD</translation>
+    </message>
+    <message>
+        <source>Data export and full deletion (GDPR)</source>
+        <translation>Exportación de datos y borrado completo (RGPD)</translation>
+    </message>
+    <message>
         <source>100% on-device processing</source>
         <translation>Procesamiento 100 % en el dispositivo</translation>
     </message>
@@ -105,6 +137,36 @@
     </message>
 </context>
 <context>
+    <name>DayPhotosPage</name>
+    <message>
+        <source>photo</source>
+        <translation>foto</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>fotos</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Sin fotos</translation>
+    </message>
+</context>
+<context>
+    <name>MemoryDetailPage</name>
+    <message>
+        <source>photo</source>
+        <translation>foto</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>fotos</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Sin fotos</translation>
+    </message>
+</context>
+<context>
     <name>EventsPage</name>
     <message>
         <source>Events</source>
@@ -140,6 +202,14 @@
 </context>
 <context>
     <name>IdentifyFaceDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>O crea una persona solo en la app:</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Cancelar</translation>
@@ -228,6 +298,30 @@
 </context>
 <context>
     <name>MainPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>¿Fusionar duplicados?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ya está vinculado a este contacto. ¿Fusionar %2 en %1?</translation>
+    </message>
+    <message>
+        <source>Deleting %1</source>
+        <translation>Eliminando %1</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Cambiar contacto vinculado</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Desvincular contacto</translation>
+    </message>
     <message>
         <source>About</source>
         <translation>Acerca de</translation>
@@ -352,6 +446,10 @@
 <context>
     <name>MemoriesPage</name>
     <message>
+        <source>Photos from around this time in previous years</source>
+        <translation>Fotos de esta época en años anteriores</translation>
+    </message>
+    <message>
         <source> year ago</source>
         <translation> año atrás</translation>
     </message>
@@ -453,6 +551,30 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>¿Fusionar duplicados?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 ya está vinculado a este contacto. ¿Fusionar %2 en %1?</translation>
+    </message>
+    <message>
+        <source>Open in Contacts</source>
+        <translation>Abrir en Contactos</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Cambiar contacto vinculado</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Desvincular contacto</translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation>Confirmar todas las coincidencias</translation>
@@ -581,6 +703,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Todas las fotos se han asociado automáticamente a estas personas:</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -688,7 +814,54 @@
     </message>
 </context>
 <context>
+    <name>SelectContactDialog</name>
+    <message>
+        <source>Your address book appears to be empty</source>
+        <translation>Tu libreta de direcciones parece vacía</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Vincular</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+    <message>
+        <source>Link %1 to a contact</source>
+        <translation>Vincular %1 a un contacto</translation>
+    </message>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Search contacts</source>
+        <translation>Buscar contactos</translation>
+    </message>
+    <message>
+        <source>Unnamed contact</source>
+        <translation>Contacto sin nombre</translation>
+    </message>
+    <message>
+        <source>No contacts</source>
+        <translation>Sin contactos</translation>
+    </message>
+    <message>
+        <source>No contact matches your search</source>
+        <translation>Ningún contacto coincide con tu búsqueda</translation>
+    </message>
+</context>
+<context>
     <name>SelectPersonDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Vincular a un contacto</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>O crea una persona solo en la app:</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Cancelar</translation>
@@ -728,6 +901,66 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Ventana de recuerdos</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>días</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>Los recuerdos muestran fotos tomadas dentro de este número de días alrededor de la fecha de hoy en años anteriores</translation>
+    </message>
+    <message>
+        <source>Contacts integration</source>
+        <translation>Integración de contactos</translation>
+    </message>
+    <message>
+        <source>Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.</source>
+        <translation>Permite vincular personas a los contactos del dispositivo. Si está desactivado, Nami nunca lee tus contactos, aunque el permiso esté concedido.</translation>
+    </message>
+    <message>
+        <source>Grid ×2</source>
+        <translation>Cuadrícula ×2</translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation>Cuadrícula ×4</translation>
+    </message>
+    <message>
+        <source>Scanned folders</source>
+        <translation>Carpetas analizadas</translation>
+    </message>
+    <message>
+        <source>Nami only scans the folders listed here. Add a folder on the SD card to include external photos.</source>
+        <translation>Nami solo analiza las carpetas indicadas aquí. Añade una carpeta en la tarjeta SD para incluir fotos externas.</translation>
+    </message>
+    <message>
+        <source>Add folder</source>
+        <translation>Añadir carpeta</translation>
+    </message>
+    <message>
+        <source>Display</source>
+        <translation>Visualización</translation>
+    </message>
+    <message>
+        <source>People layout</source>
+        <translation>Disposición de personas</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Lista</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Cuadrícula</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Quitar</translation>
+    </message>
     <message>
         <source>All face recognition processing happens locally on your device. No data is sent to external servers.</source>
         <translation>Todo el reconocimiento facial se procesa localmente en tu dispositivo. No se envían datos a servidores externos.</translation>

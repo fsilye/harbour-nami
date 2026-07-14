@@ -1,14 +1,38 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
+import Nemo.DBus 2.0
 
 Page {
     id: page
 
     property int personId: -1
     property string personName: ""
+    property string contactId: ""
     property var faceManager: facePipeline
 
     allowedOrientations: Orientation.All
+
+    function loadContact() {
+        if (faceManager && faceManager.initialized && personId >= 0) {
+            contactId = faceManager.personContactId(personId)
+        }
+    }
+
+    // People app UI (Contacts permission grants talk access)
+    DBusInterface {
+        id: contactsUi
+        bus: DBus.SessionBus
+        service: "com.jolla.contacts.ui"
+        path: "/com/jolla/contacts/ui"
+        iface: "com.jolla.contacts.ui"
+    }
+
+    function openInContacts() {
+        var cid = parseInt(contactId)
+        if (cid > 0) {
+            contactsUi.typedCall("showContact", { "type": "i", "value": cid })
+        }
+    }
 
     // Photos with this person
     ListModel {
@@ -30,6 +54,7 @@ Page {
 
     Component.onCompleted: {
         loadPhotos()
+        loadContact()
     }
 
     SilicaFlickable {
@@ -49,24 +74,80 @@ Page {
             MenuItem {
                 text: qsTr("Rename")
                 onClicked: {
-                    var dialog = pageStack.push("Sailfish.Silica.InputDialog", {
-                        acceptDestination: page,
-                        acceptDestinationAction: PageStackAction.Pop,
-                        title: qsTr("Rename Person"),
-                        placeholderText: qsTr("Enter name"),
-                        text: personName
+                    var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/RenamePersonDialog.qml"), {
+                        personId: personId,
+                        currentName: personName
                     })
                     dialog.accepted.connect(function() {
-                        facePipeline.updatePersonName(personId, dialog.value)
-                        personName = dialog.value
+                        facePipeline.updatePersonName(personId, dialog.newName)
+                        personName = dialog.newName
                     })
+                }
+            }
+            MenuItem {
+                text: contactId.length > 0 ? qsTr("Change linked contact") : qsTr("Link to contact")
+                visible: facePipeline.contactsEnabled
+                onClicked: {
+                    var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectContactDialog.qml"), {
+                        personName: personName
+                    })
+                    dialog.accepted.connect(function() {
+                        // Same contact already linked to another person:
+                        // most likely duplicates, offer to merge
+                        var existingId = -1
+                        var existingName = ""
+                        var people = facePipeline.getAllPeople()
+                        for (var i = 0; i < people.length; i++) {
+                            if (people[i].contact_id === dialog.selectedContactId
+                                    && people[i].person_id !== personId) {
+                                existingId = people[i].person_id
+                                existingName = people[i].name
+                                break
+                            }
+                        }
+
+                        if (existingId > 0) {
+                            pageStack.completeAnimation()
+                            var confirm = pageStack.push(Qt.resolvedUrl("../dialogs/ConfirmDialog.qml"), {
+                                title: qsTr("Merge duplicates?"),
+                                message: qsTr("%1 is already linked to this contact. Merge %2 into %1?").arg(existingName).arg(personName)
+                            })
+                            confirm.accepted.connect(function() {
+                                facePipeline.mergePersons(personId, existingId)
+                                pageStack.pop()
+                            })
+                            confirm.rejected.connect(function() {
+                                facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
+                                contactId = dialog.selectedContactId
+                                if (dialog.selectedContactName.length > 0) {
+                                    facePipeline.updatePersonName(personId, dialog.selectedContactName)
+                                    personName = dialog.selectedContactName
+                                }
+                            })
+                        } else {
+                            facePipeline.linkPersonToContact(personId, dialog.selectedContactId)
+                            contactId = dialog.selectedContactId
+                            // Adopt the contact's name for the person
+                            if (dialog.selectedContactName.length > 0) {
+                                facePipeline.updatePersonName(personId, dialog.selectedContactName)
+                                personName = dialog.selectedContactName
+                            }
+                        }
+                    })
+                }
+            }
+            MenuItem {
+                text: qsTr("Unlink contact")
+                visible: facePipeline.contactsEnabled && contactId.length > 0
+                onClicked: {
+                    facePipeline.linkPersonToContact(personId, "")
+                    contactId = ""
                 }
             }
             MenuItem {
                 text: qsTr("Delete")
                 onClicked: {
-                    var remorse = pageStack.push("Sailfish.Silica.RemorsePopup")
-                    remorse.execute(qsTr("Deleting %1").arg(personName), function() {
+                    Remorse.popupAction(page, qsTr("Deleting %1").arg(personName), function() {
                         facePipeline.deletePerson(personId)
                         pageStack.pop()
                     })
@@ -120,6 +201,37 @@ Page {
                 }
             }
 
+            // Linked contact indicator + shortcut to the People app
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeSmall
+                visible: contactId.length > 0 && facePipeline.contactsEnabled
+                onClicked: openInContacts()
+
+                Row {
+                    anchors {
+                        left: parent.left
+                        leftMargin: Theme.horizontalPageMargin
+                        right: parent.right
+                        rightMargin: Theme.horizontalPageMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                    spacing: Theme.paddingMedium
+
+                    Icon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        source: "image://theme/icon-m-contact"
+                        color: Theme.highlightColor
+                    }
+
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: qsTr("Open in Contacts")
+                        color: Theme.highlightColor
+                    }
+                }
+            }
+
             SectionHeader {
                 text: qsTr("Photos")
                 visible: photosModel.count > 0
@@ -149,6 +261,8 @@ Page {
                                 anchors.margins: Theme.paddingSmall / 2
                                 source: model.file_path ? "file://" + model.file_path : ""
                                 fillMode: Image.PreserveAspectCrop
+                                autoTransform: true
+                                rotation: model.rotation || 0
                                 asynchronous: true
                                 clip: true
 
@@ -250,7 +364,7 @@ Page {
                                 text: qsTr("Remove from person")
                                 onClicked: {
                                     photoItem.remorseAction(qsTr("Removing"), function() {
-                                        if (facePipeline.removeFaceFromPerson(model.face_id)) {
+                                        if (facePipeline.removePersonFromPhoto(page.personId, model.photo_id)) {
                                             photosModel.remove(index)
                                         }
                                     })

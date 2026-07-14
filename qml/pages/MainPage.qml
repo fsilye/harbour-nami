@@ -7,9 +7,6 @@ Page {
 
     allowedOrientations: Orientation.All
 
-    // Access global face pipeline from C++ backend
-    // facePipeline is exposed via QML context in main.cpp
-
     // People model (source data)
     ListModel {
         id: peopleModel
@@ -26,10 +23,23 @@ Page {
     // Sort mode: "name" or "photos"
     property string sortMode: "photos"
 
+    // Layout: 0 = list, otherwise number of grid columns (2 or 4)
+    property int gridColumns: 0
+
     // Statistics
     property int totalPeople: 0
     property int totalPhotos: 0
     property string topPerson: ""
+
+    function reloadViewMode() {
+        if (facePipeline && facePipeline.initialized) {
+            var mode = facePipeline.getSetting("people_view_mode", "list")
+            // "grid" is the legacy value for the 2-column grid
+            gridColumns = (mode === "grid4") ? 4
+                        : (mode === "grid2" || mode === "grid") ? 2
+                        : 0
+        }
+    }
 
     // Refresh people list
     function refreshPeople() {
@@ -60,8 +70,6 @@ Page {
 
     // Filter and sort people
     function filterAndSort() {
-        filteredPeopleModel.clear()
-
         // Collect filtered items
         var items = []
         for (var i = 0; i < peopleModel.count; i++) {
@@ -72,7 +80,8 @@ Page {
                 items.push({
                     person_id: person.person_id,
                     name: person.name,
-                    photo_count: person.photo_count
+                    photo_count: person.photo_count,
+                    contact_id: person.contact_id || ""
                 })
             }
         }
@@ -88,15 +97,140 @@ Page {
             })
         }
 
-        // Populate filtered model
+        // Update the model in place: clear()+append resets the view on
+        // every keystroke and steals focus from the search field
         for (var j = 0; j < items.length; j++) {
-            filteredPeopleModel.append(items[j])
+            if (j < filteredPeopleModel.count) {
+                filteredPeopleModel.set(j, items[j])
+            } else {
+                filteredPeopleModel.append(items[j])
+            }
+        }
+        while (filteredPeopleModel.count > items.length) {
+            filteredPeopleModel.remove(filteredPeopleModel.count - 1)
         }
     }
 
+    // === Actions (shared between list and grid layouts) ===
+
+    function openPerson(personId, name) {
+        pageStack.push(Qt.resolvedUrl("PersonDetailPage.qml"), {
+            personId: personId,
+            personName: name
+        })
+    }
+
+    function renamePerson(personId, name) {
+        var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/RenamePersonDialog.qml"), {
+            personId: personId,
+            currentName: name
+        })
+        dialog.accepted.connect(function() {
+            facePipeline.updatePersonName(personId, dialog.newName)
+            refreshPeople()
+        })
+    }
+
+    function mergePerson(personId, name) {
+        var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectPersonDialog.qml"), {
+            peopleModel: peopleModel,
+            allowCreate: false,
+            excludePersonId: personId,
+            titleText: qsTr("Merge %1 into...").arg(name),
+            acceptLabel: qsTr("Merge")
+        })
+        dialog.accepted.connect(function() {
+            if (dialog.selectedPersonId > 0) {
+                facePipeline.mergePersons(personId, dialog.selectedPersonId)
+                refreshPeople()
+            }
+        })
+    }
+
+    function deletePerson(personId, name) {
+        Remorse.popupAction(page, qsTr("Deleting %1").arg(name), function() {
+            facePipeline.deletePerson(personId)
+            refreshPeople()
+        })
+    }
+
+    function applyContactLink(personId, contactId, contactName) {
+        facePipeline.linkPersonToContact(personId, contactId)
+        // Adopt the contact's name for the linked person
+        if (contactName.length > 0) {
+            facePipeline.updatePersonName(personId, contactName)
+        }
+        refreshPeople()
+    }
+
+    function linkContact(personId, name) {
+        var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectContactDialog.qml"), {
+            personName: name
+        })
+        dialog.accepted.connect(function() {
+            // Same contact already linked to another person: these are most
+            // likely duplicates of the same human, offer to merge them
+            var existingId = -1
+            var existingName = ""
+            for (var i = 0; i < peopleModel.count; i++) {
+                var p = peopleModel.get(i)
+                if (p.contact_id === dialog.selectedContactId && p.person_id !== personId) {
+                    existingId = p.person_id
+                    existingName = p.name
+                    break
+                }
+            }
+
+            if (existingId > 0) {
+                pageStack.completeAnimation()
+                var confirm = pageStack.push(Qt.resolvedUrl("../dialogs/ConfirmDialog.qml"), {
+                    title: qsTr("Merge duplicates?"),
+                    message: qsTr("%1 is already linked to this contact. Merge %2 into %1?").arg(existingName).arg(name)
+                })
+                confirm.accepted.connect(function() {
+                    facePipeline.mergePersons(personId, existingId)
+                    refreshPeople()
+                })
+                confirm.rejected.connect(function() {
+                    applyContactLink(personId, dialog.selectedContactId, dialog.selectedContactName)
+                })
+            } else {
+                applyContactLink(personId, dialog.selectedContactId, dialog.selectedContactName)
+            }
+        })
+    }
+
+    function unlinkContact(personId) {
+        facePipeline.linkPersonToContact(personId, "")
+        refreshPeople()
+    }
+
+    // === Navigation (shared by both layouts) ===
+
+    function openAbout() { pageStack.push(Qt.resolvedUrl("AboutPage.qml")) }
+    function openSettings() { pageStack.push(Qt.resolvedUrl("SettingsPage.qml")) }
+    function openMemories() { pageStack.push(Qt.resolvedUrl("MemoriesPage.qml")) }
+    function openEvents() { pageStack.push(Qt.resolvedUrl("EventsPage.qml")) }
+    function openIdentify() { pageStack.push(Qt.resolvedUrl("IdentifyFacesPage.qml")) }
+    function openScan() { pageStack.push(Qt.resolvedUrl("ScanningPage.qml")) }
+    function toggleSort() {
+        sortMode = (sortMode === "photos") ? "name" : "photos"
+        filterAndSort()
+    }
+
     Component.onCompleted: {
-        // Wait for face pipeline to be ready
+        reloadViewMode()
         if (facePipeline && facePipeline.initialized) {
+            refreshPeople()
+        }
+    }
+
+    // Coming back from Settings or a person page: re-read the layout choice
+    // and reload people (deletions/renames done on the detail page would
+    // otherwise not show until the next scan)
+    onStatusChanged: {
+        if (status === PageStatus.Active) {
+            reloadViewMode()
             refreshPeople()
         }
     }
@@ -106,57 +240,11 @@ Page {
         onScanCompleted: refreshPeople()
     }
 
-    SilicaListView {
-        id: listView
-        anchors.fill: parent
+    // Shared header for both layouts
+    Component {
+        id: peopleHeader
 
-        model: filteredPeopleModel
-
-        PullDownMenu {
-            MenuItem {
-                text: qsTr("About")
-                onClicked: pageStack.push(Qt.resolvedUrl("AboutPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Memories")
-                enabled: facePipeline && facePipeline.initialized
-                onClicked: pageStack.push(Qt.resolvedUrl("MemoriesPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Events")
-                enabled: facePipeline && facePipeline.initialized
-                onClicked: pageStack.push(Qt.resolvedUrl("EventsPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Identify Faces")
-                enabled: facePipeline && facePipeline.initialized
-                onClicked: pageStack.push(Qt.resolvedUrl("IdentifyFacesPage.qml"))
-            }
-            MenuItem {
-                text: qsTr("Scan Gallery")
-                enabled: facePipeline && facePipeline.initialized && !facePipeline.processing
-                onClicked: {
-                    // Open scanning page
-                    pageStack.push(Qt.resolvedUrl("ScanningPage.qml"))
-                }
-            }
-        }
-
-        PushUpMenu {
-            MenuItem {
-                text: sortMode === "photos" ? qsTr("Sort by Name") : qsTr("Sort by Photos")
-                onClicked: {
-                    sortMode = (sortMode === "photos") ? "name" : "photos"
-                    filterAndSort()
-                }
-            }
-        }
-
-        header: Column {
+        Column {
             width: parent.width
             spacing: 0
 
@@ -289,6 +377,8 @@ Page {
                 placeholderText: qsTr("Search people")
                 visible: totalPeople > 0
 
+                // One-way binding only: writing text back while typing
+                // breaks keyboard composition and defocuses the field
                 onTextChanged: {
                     searchQuery = text
                     filterAndSort()
@@ -303,135 +393,335 @@ Page {
                 visible: totalPeople > 0
             }
         }
+    }
 
-        delegate: ListItem {
-            id: listItem
-            width: ListView.view.width
-            contentHeight: Theme.itemSizeMedium
+    // === List layout ===
+    Component {
+        id: listLayout
 
-            Row {
-                anchors {
-                    left: parent.left
-                    leftMargin: Theme.horizontalPageMargin
-                    right: parent.right
-                    rightMargin: Theme.horizontalPageMargin
-                    verticalCenter: parent.verticalCenter
+        SilicaListView {
+            id: listView
+            anchors.fill: parent
+            model: filteredPeopleModel
+            header: peopleHeader
+            // Keep the view from grabbing focus away from the search field
+            currentIndex: -1
+
+            PullDownMenu {
+                MenuItem { text: qsTr("About"); onClicked: openAbout() }
+                MenuItem { text: qsTr("Settings"); onClicked: openSettings() }
+                MenuItem {
+                    text: qsTr("Memories")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openMemories()
                 }
-                spacing: Theme.paddingMedium
+                MenuItem {
+                    text: qsTr("Events")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openEvents()
+                }
+                MenuItem {
+                    text: qsTr("Identify Faces")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openIdentify()
+                }
+                MenuItem {
+                    text: qsTr("Scan Gallery")
+                    enabled: facePipeline && facePipeline.initialized && !facePipeline.processing
+                    onClicked: openScan()
+                }
+            }
 
-                // Face thumbnail (best face of the person, icon fallback)
-                Rectangle {
-                    width: Theme.itemSizeSmall
-                    height: Theme.itemSizeSmall
-                    radius: Theme.itemSizeSmall / 2
-                    color: Theme.rgba(Theme.highlightBackgroundColor, 0.2)
+            PushUpMenu {
+                MenuItem {
+                    text: sortMode === "photos" ? qsTr("Sort by Name") : qsTr("Sort by Photos")
+                    onClicked: toggleSort()
+                }
+            }
 
-                    Image {
-                        id: avatarImage
-                        anchors.fill: parent
-                        source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
-                        sourceSize.width: width
-                        sourceSize.height: height
-                        asynchronous: true
+            delegate: ListItem {
+                id: listItem
+                width: ListView.view.width
+                contentHeight: Theme.itemSizeMedium
+
+                Row {
+                    anchors {
+                        left: parent.left
+                        leftMargin: Theme.horizontalPageMargin
+                        right: parent.right
+                        rightMargin: Theme.horizontalPageMargin
+                        verticalCenter: parent.verticalCenter
+                    }
+                    spacing: Theme.paddingMedium
+
+                    // Face thumbnail (best face of the person, icon fallback)
+                    Rectangle {
+                        width: Theme.itemSizeSmall
+                        height: Theme.itemSizeSmall
+                        radius: Theme.itemSizeSmall / 2
+                        color: Theme.rgba(Theme.highlightBackgroundColor, 0.2)
+
+                        Image {
+                            id: avatarImage
+                            anchors.fill: parent
+                            source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
+                            sourceSize.width: width
+                            sourceSize.height: height
+                            asynchronous: true
+                        }
+
+                        Image {
+                            anchors.centerIn: parent
+                            source: "image://theme/icon-m-contact"
+                            width: Theme.iconSizeMedium
+                            height: Theme.iconSizeMedium
+                            visible: avatarImage.status !== Image.Ready
+                        }
                     }
 
-                    Image {
-                        anchors.centerIn: parent
-                        source: "image://theme/icon-m-contact"
-                        width: Theme.iconSizeMedium
-                        height: Theme.iconSizeMedium
-                        visible: avatarImage.status !== Image.Ready
+                    Column {
+                        width: parent.width - Theme.itemSizeSmall - Theme.paddingMedium
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.paddingSmall
+
+                            Label {
+                                text: model.name || qsTr("Unknown")
+                                color: listItem.highlighted ? Theme.highlightColor : Theme.primaryColor
+                                truncationMode: TruncationMode.Fade
+                                width: Math.min(implicitWidth, parent.width - (linkedIcon.visible ? linkedIcon.width + parent.spacing : 0))
+                            }
+
+                            Image {
+                                id: linkedIcon
+                                anchors.verticalCenter: parent.verticalCenter
+                                // Tinted like secondary text so it reads as
+                                // metadata, not as an action button
+                                source: "image://theme/icon-m-contact?" + Theme.secondaryColor
+                                width: Theme.iconSizeExtraSmall
+                                height: Theme.iconSizeExtraSmall
+                                sourceSize.width: width
+                                sourceSize.height: height
+                                visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
+                            }
+                        }
+
+                        Label {
+                            text: model.photo_count + " " + (model.photo_count === 1 ? qsTr("photo") : qsTr("photos"))
+                            color: listItem.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                            font.pixelSize: Theme.fontSizeExtraSmall
+                            truncationMode: TruncationMode.Fade
+                            width: parent.width
+                        }
+                    }
+                }
+
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Rename")
+                        onClicked: renamePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: (model.contact_id && model.contact_id.length > 0)
+                              ? qsTr("Change linked contact")
+                              : qsTr("Link to contact")
+                        visible: facePipeline.contactsEnabled
+                        onClicked: linkContact(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Unlink contact")
+                        visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
+                        onClicked: unlinkContact(model.person_id)
+                    }
+                    MenuItem {
+                        text: qsTr("Merge into...")
+                        visible: peopleModel.count > 1
+                        onClicked: mergePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Delete")
+                        onClicked: deletePerson(model.person_id, model.name)
+                    }
+                }
+
+                onClicked: openPerson(model.person_id, model.name)
+            }
+
+            ViewPlaceholder {
+                enabled: listView.count === 0
+                text: qsTr("No faces detected yet")
+                hintText: qsTr("Pull down to scan your gallery")
+            }
+
+            VerticalScrollDecorator {}
+        }
+    }
+
+    // === Grid layout ===
+    Component {
+        id: gridLayout
+
+        SilicaGridView {
+            id: grid
+            anchors.fill: parent
+            model: filteredPeopleModel
+            header: peopleHeader
+            // Keep the view from grabbing focus away from the search field
+            currentIndex: -1
+
+            property int columns: gridColumns > 0 ? gridColumns : 2
+            property bool dense: columns >= 4
+
+            cellWidth: width / columns
+            cellHeight: cellWidth + (dense ? Theme.itemSizeExtraSmall : Theme.itemSizeSmall)
+
+            PullDownMenu {
+                MenuItem { text: qsTr("About"); onClicked: openAbout() }
+                MenuItem { text: qsTr("Settings"); onClicked: openSettings() }
+                MenuItem {
+                    text: qsTr("Memories")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openMemories()
+                }
+                MenuItem {
+                    text: qsTr("Events")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openEvents()
+                }
+                MenuItem {
+                    text: qsTr("Identify Faces")
+                    enabled: facePipeline && facePipeline.initialized
+                    onClicked: openIdentify()
+                }
+                MenuItem {
+                    text: qsTr("Scan Gallery")
+                    enabled: facePipeline && facePipeline.initialized && !facePipeline.processing
+                    onClicked: openScan()
+                }
+            }
+
+            PushUpMenu {
+                MenuItem {
+                    text: sortMode === "photos" ? qsTr("Sort by Name") : qsTr("Sort by Photos")
+                    onClicked: toggleSort()
+                }
+            }
+
+            delegate: ListItem {
+                width: grid.cellWidth
+                contentHeight: grid.cellHeight
+
+                // Same context menu as the list layout (long press)
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Rename")
+                        onClicked: renamePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: (model.contact_id && model.contact_id.length > 0)
+                              ? qsTr("Change linked contact")
+                              : qsTr("Link to contact")
+                        visible: facePipeline.contactsEnabled
+                        onClicked: linkContact(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Unlink contact")
+                        visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
+                        onClicked: unlinkContact(model.person_id)
+                    }
+                    MenuItem {
+                        text: qsTr("Merge into...")
+                        visible: peopleModel.count > 1
+                        onClicked: mergePerson(model.person_id, model.name)
+                    }
+                    MenuItem {
+                        text: qsTr("Delete")
+                        onClicked: deletePerson(model.person_id, model.name)
                     }
                 }
 
                 Column {
-                    width: parent.width - Theme.itemSizeSmall - Theme.paddingMedium
-                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.fill: parent
+                    anchors.margins: grid.dense ? Theme.paddingSmall : Theme.paddingMedium
+                    spacing: Theme.paddingSmall
 
-                    Label {
-                        text: model.name || qsTr("Unknown")
-                        color: listItem.highlighted ? Theme.highlightColor : Theme.primaryColor
-                        truncationMode: TruncationMode.Fade
+                    Item {
+                        id: avatarFrame
                         width: parent.width
-                    }
+                        height: width
 
-                    Label {
-                        text: model.photo_count + " " + (model.photo_count === 1 ? qsTr("photo") : qsTr("photos"))
-                        color: listItem.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
-                        font.pixelSize: Theme.fontSizeExtraSmall
-                        truncationMode: TruncationMode.Fade
-                        width: parent.width
-                    }
-                }
-            }
+                        Image {
+                            id: gridAvatar
+                            anchors.fill: parent
+                            // Round crop on a transparent frame: no colored
+                            // square showing behind the circle
+                            source: FaceUtils.personAvatarUrl(facePipeline, model.person_id)
+                            sourceSize.width: width
+                            sourceSize.height: height
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                        }
 
-            menu: ContextMenu {
-                MenuItem {
-                    text: qsTr("Rename")
-                    onClicked: {
-                        var dialog = pageStack.push("Sailfish.Silica.InputDialog", {
-                            acceptDestination: page,
-                            acceptDestinationAction: PageStackAction.Pop,
-                            title: qsTr("Rename Person"),
-                            placeholderText: qsTr("Enter name"),
-                            text: model.name
-                        })
-                        dialog.accepted.connect(function() {
-                            facePipeline.updatePersonName(model.person_id, dialog.value)
-                            refreshPeople()
-                        })
-                    }
-                }
-                MenuItem {
-                    text: qsTr("Merge into...")
-                    visible: peopleModel.count > 1
-                    onClicked: {
-                        var mergeSourceId = model.person_id
-                        var mergeSourceName = model.name
-                        var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectPersonDialog.qml"), {
-                            peopleModel: peopleModel,
-                            allowCreate: false,
-                            excludePersonId: mergeSourceId,
-                            titleText: qsTr("Merge %1 into...").arg(mergeSourceName),
-                            acceptLabel: qsTr("Merge")
-                        })
-                        dialog.accepted.connect(function() {
-                            if (dialog.selectedPersonId > 0) {
-                                facePipeline.mergePersons(mergeSourceId, dialog.selectedPersonId)
-                                refreshPeople()
+                        Image {
+                            anchors.centerIn: parent
+                            source: "image://theme/icon-m-contact"
+                            visible: gridAvatar.status !== Image.Ready
+                            opacity: 0.4
+                        }
+
+                        // Discreet linked-contact badge, sitting on the
+                        // circle's lower-right edge
+                        Rectangle {
+                            anchors {
+                                bottom: parent.bottom
+                                right: parent.right
+                                margins: parent.width * 0.05
                             }
-                        })
+                            width: Theme.iconSizeSmall
+                            height: width
+                            radius: width / 2
+                            color: Theme.rgba("black", 0.5)
+                            visible: facePipeline.contactsEnabled && model.contact_id && model.contact_id.length > 0
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: "image://theme/icon-m-contact?#ffffff"
+                                width: parent.width * 0.6
+                                height: width
+                                sourceSize.width: width
+                                sourceSize.height: height
+                            }
+                        }
+                    }
+
+                    Label {
+                        width: parent.width
+                        text: model.name || qsTr("Unknown")
+                        color: Theme.primaryColor
+                        font.pixelSize: grid.dense ? Theme.fontSizeExtraSmall : Theme.fontSizeSmall
+                        truncationMode: TruncationMode.Fade
+                        horizontalAlignment: Text.AlignHCenter
                     }
                 }
-                MenuItem {
-                    text: qsTr("Delete")
-                    onClicked: {
-                        var dialog = pageStack.push("Sailfish.Silica.RemorseDialog", {
-                            title: qsTr("Delete person?"),
-                            text: qsTr("This will remove %1 and unlink all their photos").arg(model.name)
-                        })
-                        dialog.accepted.connect(function() {
-                            facePipeline.deletePerson(model.person_id)
-                            refreshPeople()
-                        })
-                    }
-                }
+
+                onClicked: openPerson(model.person_id, model.name)
             }
 
-            onClicked: {
-                pageStack.push(Qt.resolvedUrl("PersonDetailPage.qml"), {
-                    personId: model.person_id,
-                    personName: model.name
-                })
+            ViewPlaceholder {
+                enabled: grid.count === 0
+                text: qsTr("No faces detected yet")
+                hintText: qsTr("Pull down to scan your gallery")
             }
-        }
 
-        ViewPlaceholder {
-            enabled: listView.count === 0
-            text: qsTr("No faces detected yet")
-            hintText: qsTr("Pull down to scan your gallery")
+            VerticalScrollDecorator {}
         }
+    }
 
-        VerticalScrollDecorator {}
+    // Only one layout is instantiated at a time
+    Loader {
+        anchors.fill: parent
+        sourceComponent: gridColumns > 0 ? gridLayout : listLayout
     }
 }

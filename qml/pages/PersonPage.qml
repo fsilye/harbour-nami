@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Page {
@@ -196,6 +196,8 @@ Page {
                 anchors.margins: Theme.paddingSmall / 2
                 source: model.file_path ? "file://" + model.file_path : ""
                 fillMode: Image.PreserveAspectCrop
+                autoTransform: true
+                rotation: model.rotation || 0
                 clip: true
                 asynchronous: true
 

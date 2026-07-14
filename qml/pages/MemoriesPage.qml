@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Page {
@@ -14,24 +14,37 @@ Page {
     }
 
     Component.onCompleted: {
+        if (faceManager && faceManager.initialized) {
+            windowDays = parseInt(faceManager.getSetting("memories_window_days", "20"))
+        }
         detectMemories()
     }
 
-    // Detect memories: photos from same date in previous years
+    // Days to look around today's date: exact-day matching almost never
+    // fires, a window makes memories actually show up (user-tunable)
+    property int windowDays: 20
+
+    // Circular distance in days between a photo's month/day and today's,
+    // ignoring the year (so Dec 30 is 3 days from Jan 2)
+    function dayDistance(photoDate, today) {
+        var a = new Date(2001, photoDate.getMonth(), photoDate.getDate())
+        var b = new Date(2001, today.getMonth(), today.getDate())
+        var d = Math.abs(Math.round((a.getTime() - b.getTime()) / 86400000))
+        return Math.min(d, 365 - d)
+    }
+
+    // Detect memories: photos from around this date in previous years
     function detectMemories() {
         if (!faceManager || !faceManager.initialized) return
 
         memoriesModel.clear()
 
         var today = new Date()
-        var todayMonth = today.getMonth()
-        var todayDay = today.getDate()
+        var currentYear = today.getFullYear()
 
-        // Get all people
         var people = faceManager.getAllPeople()
-        var memories = {}  // Map of years ago -> photos
+        var byYear = {}  // year -> { photos, people, bestDistance }
 
-        // Scan all photos
         for (var i = 0; i < people.length; i++) {
             var person = people[i]
             var photos = faceManager.getPersonPhotos(person.person_id)
@@ -41,53 +54,50 @@ Page {
                 if (!photo.timestamp) continue
 
                 var photoDate = new Date(photo.timestamp * 1000)
-                var photoMonth = photoDate.getMonth()
-                var photoDay = photoDate.getDate()
                 var photoYear = photoDate.getFullYear()
+                if (photoYear >= currentYear) continue
 
-                // Check if same day and month, but different year
-                if (photoMonth === todayMonth && photoDay === todayDay && photoYear < today.getFullYear()) {
-                    var yearsAgo = today.getFullYear() - photoYear
+                var distance = dayDistance(photoDate, today)
+                if (distance > windowDays) continue
 
-                    if (!memories[yearsAgo]) {
-                        memories[yearsAgo] = {
-                            yearsAgo: yearsAgo,
-                            date: photoDate,
-                            photos: [],
-                            people: {}
-                        }
+                if (!byYear[photoYear]) {
+                    byYear[photoYear] = {
+                        year: photoYear,
+                        photos: [],
+                        seen: {},
+                        people: {},
+                        bestDistance: distance,
+                        repDate: photoDate
                     }
+                }
 
-                    // Add photo if not duplicate
-                    var photoExists = false
-                    for (var k = 0; k < memories[yearsAgo].photos.length; k++) {
-                        if (memories[yearsAgo].photos[k].file_path === photo.file_path) {
-                            photoExists = true
-                            break
-                        }
-                    }
-                    if (!photoExists) {
-                        memories[yearsAgo].photos.push(photo)
-                        memories[yearsAgo].people[person.person_id] = person.name
+                var group = byYear[photoYear]
+                if (!group.seen[photo.file_path]) {
+                    group.seen[photo.file_path] = true
+                    group.photos.push(photo)
+                    group.people[person.person_id] = person.name
+                    if (distance < group.bestDistance) {
+                        group.bestDistance = distance
+                        group.repDate = photoDate
                     }
                 }
             }
         }
 
-        // Convert to model
-        for (var yearsAgo in memories) {
-            var memory = memories[yearsAgo]
-
-            // Get people names
+        // Plain JS objects (ListModel.get() references break after clear())
+        var memoriesList = []
+        for (var year in byYear) {
+            var memory = byYear[year]
             var peopleNames = []
             for (var personId in memory.people) {
                 peopleNames.push(memory.people[personId])
             }
 
-            memoriesModel.append({
-                yearsAgo: memory.yearsAgo,
-                date: memory.date,
-                dateString: Qt.formatDate(memory.date, "d MMMM yyyy"),
+            memoriesList.push({
+                year: memory.year,
+                yearsAgo: currentYear - memory.year,
+                dateString: Qt.formatDate(memory.repDate, "d MMMM yyyy"),
+                distanceDays: memory.bestDistance,
                 photoCount: memory.photos.length,
                 peopleCount: peopleNames.length,
                 peopleNames: peopleNames.join(", "),
@@ -95,16 +105,14 @@ Page {
             })
         }
 
-        // Sort by years ago (most recent first)
-        var memoriesList = []
-        for (var m = 0; m < memoriesModel.count; m++) {
-            memoriesList.push(memoriesModel.get(m))
-        }
+        // Closest to today first, then most recent year
         memoriesList.sort(function(a, b) {
+            if (a.distanceDays !== b.distanceDays) {
+                return a.distanceDays - b.distanceDays
+            }
             return a.yearsAgo - b.yearsAgo
         })
 
-        memoriesModel.clear()
         for (var n = 0; n < memoriesList.length; n++) {
             memoriesModel.append(memoriesList[n])
         }
@@ -127,7 +135,7 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("Photos from this day in previous years")
+                text: qsTr("Photos from around this time in previous years")
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryHighlightColor
                 wrapMode: Text.WordWrap
@@ -162,6 +170,7 @@ Page {
                         anchors.fill: parent
                         source: model.coverPhoto ? "file://" + model.coverPhoto : ""
                         fillMode: Image.PreserveAspectCrop
+                        autoTransform: true
                         clip: true
                         asynchronous: true
 
@@ -238,8 +247,11 @@ Page {
             }
 
             onClicked: {
-                // TODO: Open memory detail page
-                console.log("Memory clicked:", model.yearsAgo, "years ago")
+                pageStack.push(Qt.resolvedUrl("MemoryDetailPage.qml"), {
+                    year: model.year,
+                    windowDays: windowDays,
+                    title: model.dateString
+                })
             }
         }
 

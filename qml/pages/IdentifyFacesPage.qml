@@ -38,11 +38,11 @@ Page {
         }
     }
 
-    // Identify face as new person or existing
-    function identifyFace(personId, personName) {
+    // Identify face as new person or existing (optionally linking a contact)
+    function identifyFace(personId, personName, contactId) {
         if (!currentFace) return
 
-        facePipeline.identifyFace(currentFace.face_id, personId, personName)
+        facePipeline.identifyFace(currentFace.face_id, personId, personName, contactId || "")
         nextFace()
     }
 
@@ -202,10 +202,13 @@ Page {
                     onClicked: {
                         // Open dialog to select person
                         var dialog = pageStack.push(Qt.resolvedUrl("../dialogs/SelectPersonDialog.qml"), {
-                            peopleModel: peopleModel
+                            peopleModel: peopleModel,
+                            allowContact: true
                         })
                         dialog.accepted.connect(function() {
-                            if (dialog.createNew) {
+                            if (dialog.selectedContactId.length > 0) {
+                                identifyFace(-1, dialog.selectedContactName, dialog.selectedContactId)
+                            } else if (dialog.createNew) {
                                 identifyFace(-1, dialog.personName)
                             } else {
                                 identifyFace(dialog.selectedPersonId, "")

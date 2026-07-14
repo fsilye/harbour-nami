@@ -1,6 +1,6 @@
 Name: harbour-nami
 Summary: Face Recognition Photo Gallery
-Version: 0.7.0
+Version: 0.8.0
 Release: 1
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
@@ -41,6 +41,8 @@ PkgBR:
 Requires:
   - sailfishsilica-qt5 >= 0.10.9
   - qt5-plugin-sqldriver-sqlite
+  - nemo-qml-plugin-contacts-qt5
+  - nemo-qml-plugin-dbus-qt5
 
 # All installed files
 Files:

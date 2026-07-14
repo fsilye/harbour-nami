@@ -1,12 +1,27 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Page {
     id: page
 
     property string photoPath: ""
+    // User-applied rotation on top of EXIF auto-orientation, persisted
+    property int userRotation: 0
 
     allowedOrientations: Orientation.All
+
+    Component.onCompleted: {
+        if (facePipeline && facePipeline.initialized && photoPath) {
+            userRotation = facePipeline.photoRotation(photoPath)
+        }
+    }
+
+    function rotatePhoto() {
+        userRotation = (userRotation + 90) % 360
+        if (facePipeline && facePipeline.initialized) {
+            facePipeline.setPhotoRotation(photoPath, userRotation)
+        }
+    }
 
     SilicaFlickable {
         anchors.fill: parent
@@ -47,15 +62,21 @@ Page {
                     anchors.centerIn: parent
                     source: photoPath ? "file://" + photoPath : ""
                     fillMode: Image.PreserveAspectFit
+                    autoTransform: true  // honor EXIF orientation
                     asynchronous: true
 
-                    width: page.isPortrait ? page.width : page.width
-                    height: page.isPortrait ? page.height : page.height
+                    width: page.width
+                    height: page.height
 
                     scale: 1.0
+                    rotation: page.userRotation
                     transformOrigin: Item.Center
 
                     Behavior on scale {
+                        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+                    }
+
+                    Behavior on rotation {
                         NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
                     }
 
@@ -119,9 +140,16 @@ Page {
                     opacity: 0.8
                 }
 
-                // Reset zoom button
+                // Rotate 90° clockwise (persisted)
                 IconButton {
                     icon.source: "image://theme/icon-m-refresh"
+                    onClicked: rotatePhoto()
+                    opacity: 0.8
+                }
+
+                // Reset zoom button
+                IconButton {
+                    icon.source: "image://theme/icon-m-clear"
                     onClicked: {
                         photoImage.scale = 1.0
                         flickable.contentX = 0

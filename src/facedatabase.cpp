@@ -115,6 +115,7 @@ bool FaceDatabase::initializeSchema()
     query.exec("ALTER TABLE faces ADD COLUMN similarity_score REAL DEFAULT 0.0");
     query.exec("ALTER TABLE faces ADD COLUMN verified INTEGER DEFAULT 0");
     query.exec("ALTER TABLE faces ADD COLUMN ignored INTEGER DEFAULT 0");
+    query.exec("ALTER TABLE photos ADD COLUMN rotation INTEGER DEFAULT 0");
 
     // Rejections: "this face is NOT this person", so auto-matching never
     // reassigns a face the user explicitly removed from a person
@@ -135,12 +136,16 @@ bool FaceDatabase::initializeSchema()
         CREATE TABLE IF NOT EXISTS people (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            contact_id TEXT
         )
     )")) {
         emit error("Failed to create people table: " + query.lastError().text());
         return false;
     }
+
+    // Migrate existing database: link to device contacts
+    query.exec("ALTER TABLE people ADD COLUMN contact_id TEXT");
 
     // Settings table
     if (!query.exec(R"(
@@ -235,10 +240,33 @@ Photo FaceDatabase::getPhoto(int photoId)
         photo.width = query.value("width").toInt();
         photo.height = query.value("height").toInt();
         photo.processedAt = QDateTime::fromString(query.value("processed_at").toString(), Qt::ISODate);
+        photo.rotation = query.value("rotation").toInt();
         return photo;
     }
 
-    return Photo{-1, "", QDateTime(), 0, 0, QDateTime()};
+    return Photo{-1, "", QDateTime(), 0, 0, QDateTime(), 0};
+}
+
+int FaceDatabase::photoRotation(const QString &filePath)
+{
+    QSqlQuery query(m_db);
+    query.prepare("SELECT rotation FROM photos WHERE file_path = :path");
+    query.bindValue(":path", filePath);
+
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt();
+    }
+    return 0;
+}
+
+bool FaceDatabase::setPhotoRotation(const QString &filePath, int rotation)
+{
+    QSqlQuery query(m_db);
+    query.prepare("UPDATE photos SET rotation = :rotation WHERE file_path = :path");
+    query.bindValue(":rotation", rotation);
+    query.bindValue(":path", filePath);
+
+    return query.exec();
 }
 
 QVector<Photo> FaceDatabase::getAllPhotos()
@@ -255,6 +283,7 @@ QVector<Photo> FaceDatabase::getAllPhotos()
             photo.width = query.value("width").toInt();
             photo.height = query.value("height").toInt();
             photo.processedAt = QDateTime::fromString(query.value("processed_at").toString(), Qt::ISODate);
+            photo.rotation = query.value("rotation").toInt();
             photos.append(photo);
         }
     }
@@ -422,6 +451,33 @@ bool FaceDatabase::removeFaceFromPerson(int faceId)
     return query.exec();
 }
 
+bool FaceDatabase::removePersonFromPhoto(int personId, int photoId)
+{
+    // Collect the affected faces first so each rejection is remembered
+    QVector<int> faceIds;
+    QSqlQuery sel(m_db);
+    sel.prepare("SELECT id FROM faces WHERE photo_id = :photo AND person_id = :person");
+    sel.bindValue(":photo", photoId);
+    sel.bindValue(":person", personId);
+    if (sel.exec()) {
+        while (sel.next()) {
+            faceIds.append(sel.value(0).toInt());
+        }
+    }
+
+    for (int faceId : faceIds) {
+        addNegativeMatch(faceId, personId);
+    }
+
+    QSqlQuery upd(m_db);
+    upd.prepare("UPDATE faces SET person_id = -1, verified = 0 "
+                "WHERE photo_id = :photo AND person_id = :person");
+    upd.bindValue(":photo", photoId);
+    upd.bindValue(":person", personId);
+
+    return upd.exec();
+}
+
 bool FaceDatabase::setFaceIgnored(int faceId, bool ignored)
 {
     QSqlQuery query(m_db);
@@ -517,10 +573,11 @@ Person FaceDatabase::getPerson(int personId)
         person.name = query.value("name").toString();
         person.createdAt = QDateTime::fromString(query.value("created_at").toString(), Qt::ISODate);
         person.photoCount = query.value("photo_count").toInt();
+        person.contactId = query.value("contact_id").toString();
         return person;
     }
 
-    return Person{-1, "", QDateTime(), 0};
+    return Person{-1, "", QDateTime(), 0, QString()};
 }
 
 QVector<Person> FaceDatabase::getAllPeople()
@@ -541,6 +598,7 @@ QVector<Person> FaceDatabase::getAllPeople()
             person.name = query.value("name").toString();
             person.createdAt = QDateTime::fromString(query.value("created_at").toString(), Qt::ISODate);
             person.photoCount = query.value("photo_count").toInt();
+            person.contactId = query.value("contact_id").toString();
             people.append(person);
         }
     }
@@ -553,6 +611,17 @@ bool FaceDatabase::updatePersonName(int personId, const QString &name)
     QSqlQuery query(m_db);
     query.prepare("UPDATE people SET name = :name WHERE id = :id");
     query.bindValue(":name", name);
+    query.bindValue(":id", personId);
+
+    return query.exec();
+}
+
+bool FaceDatabase::setPersonContact(int personId, const QString &contactId)
+{
+    QSqlQuery query(m_db);
+    query.prepare("UPDATE people SET contact_id = :contact_id WHERE id = :id");
+    // Store NULL rather than "" when unlinking
+    query.bindValue(":contact_id", contactId.isEmpty() ? QVariant() : QVariant(contactId));
     query.bindValue(":id", personId);
 
     return query.exec();

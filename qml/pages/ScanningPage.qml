@@ -12,9 +12,12 @@ Page {
     property bool scanning: true
 
     Component.onCompleted: {
-        // Start scanning the configured folder (defaults to Pictures)
-        var galleryPath = facePipeline.getSetting("gallery_path", defaultGalleryPath)
-        facePipeline.scanGallery(galleryPath, true)
+        // Start scanning every whitelisted folder (defaults to Pictures)
+        var raw = facePipeline.getSetting("scan_folders", "")
+        var folders = raw.length > 0
+            ? raw.split("\n").filter(function (f) { return f.length > 0 })
+            : [facePipeline.getSetting("gallery_path", defaultGalleryPath)]
+        facePipeline.scanGalleries(folders, true)
     }
 
     Connections {

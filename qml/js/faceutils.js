@@ -14,8 +14,9 @@ function cropUrl(photoPath, x, y, w, h, round) {
     return url
 }
 
-// Round avatar URL for a person's best face; "" when the person has none
-function personAvatarUrl(pipeline, personId) {
+// Avatar URL for a person's best face; "" when the person has none.
+// Round by default (list circles); pass round=false for square tiles (grid)
+function personAvatarUrl(pipeline, personId, round) {
     if (!pipeline || !pipeline.initialized) {
         return ""
     }
@@ -24,5 +25,6 @@ function personAvatarUrl(pipeline, personId) {
         return ""
     }
     return cropUrl(face.photo_path, face.bbox_x, face.bbox_y,
-                   face.bbox_width, face.bbox_height, true)
+                   face.bbox_width, face.bbox_height,
+                   round === undefined ? true : round)
 }

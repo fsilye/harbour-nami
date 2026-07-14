@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 Page {
@@ -65,23 +65,24 @@ Page {
             }
         }
 
-        // Convert to events (filter: at least 2 photos same day)
+        // Convert to plain JS objects first: ListModel.get() returns live
+        // references that are invalidated by clear(), so sorting via the
+        // model produced rows with empty fields ("0 photos" events)
+        var events = []
         for (var dateKey in dateMap) {
             var event = dateMap[dateKey]
             if (event.photos.length >= 2) {
-                // Count unique people
-                var peopleCount = 0
                 var peopleNames = []
                 for (var personId in event.people) {
-                    peopleCount++
                     peopleNames.push(event.people[personId])
                 }
 
-                eventsModel.append({
-                    date: event.date,
+                events.push({
+                    dateKey: dateKey,
+                    time: event.date.getTime(),
                     dateString: Qt.formatDate(event.date, "ddd d MMM yyyy"),
                     photoCount: event.photos.length,
-                    peopleCount: peopleCount,
+                    peopleCount: peopleNames.length,
                     peopleNames: peopleNames.join(", "),
                     coverPhoto: event.photos[0].file_path
                 })
@@ -89,15 +90,10 @@ Page {
         }
 
         // Sort by date (most recent first)
-        var events = []
-        for (var m = 0; m < eventsModel.count; m++) {
-            events.push(eventsModel.get(m))
-        }
         events.sort(function(a, b) {
-            return b.date - a.date
+            return b.time - a.time
         })
 
-        eventsModel.clear()
         for (var n = 0; n < events.length; n++) {
             eventsModel.append(events[n])
         }
@@ -152,6 +148,7 @@ Page {
                     anchors.verticalCenter: parent.verticalCenter
                     source: model.coverPhoto ? "file://" + model.coverPhoto : ""
                     fillMode: Image.PreserveAspectCrop
+                    autoTransform: true
                     clip: true
                     asynchronous: true
 
@@ -204,8 +201,10 @@ Page {
             }
 
             onClicked: {
-                // TODO: Open event detail page showing all photos from this date
-                console.log("Event clicked:", model.dateString)
+                pageStack.push(Qt.resolvedUrl("DayPhotosPage.qml"), {
+                    dateKey: model.dateKey,
+                    title: model.dateString
+                })
             }
         }
 

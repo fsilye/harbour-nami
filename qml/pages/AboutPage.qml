@@ -28,9 +28,12 @@ Page {
 
             Image {
                 anchors.horizontalCenter: parent.horizontalCenter
-                source: "image://theme/icon-l-image"
-                width: Theme.iconSizeExtraLarge
-                height: Theme.iconSizeExtraLarge
+                // App launcher icon (resolved from hicolor by the theme)
+                source: "image://theme/harbour-nami"
+                width: Theme.iconSizeLauncher * 2
+                height: width
+                sourceSize.width: width
+                sourceSize.height: height
             }
 
             Item {
@@ -47,7 +50,7 @@ Page {
 
             Label {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "v0.1.0"
+                text: "v" + appVersion
                 color: Theme.secondaryHighlightColor
                 font.pixelSize: Theme.fontSizeMedium
             }
@@ -84,11 +87,14 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: "• " + qsTr("100% on-device processing") + "\n" +
-                      "• " + qsTr("Automatic face detection") + "\n" +
-                      "• " + qsTr("Smart photo grouping") + "\n" +
-                      "• " + qsTr("Privacy-first design") + "\n" +
-                      "• " + qsTr("No internet connection required")
+                text: "• " + qsTr("100% on-device processing, no internet required") + "\n" +
+                      "• " + qsTr("Automatic face detection and recognition") + "\n" +
+                      "• " + qsTr("People gallery in list or grid layout") + "\n" +
+                      "• " + qsTr("Link people to your device contacts") + "\n" +
+                      "• " + qsTr("Events grouped by day") + "\n" +
+                      "• " + qsTr("Memories from previous years") + "\n" +
+                      "• " + qsTr("Scan folders of your choice, SD card included") + "\n" +
+                      "• " + qsTr("Data export and full deletion (GDPR)")
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeSmall
                 wrapMode: Text.WordWrap

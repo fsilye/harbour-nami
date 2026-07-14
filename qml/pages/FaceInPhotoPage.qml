@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 // Shows the full photo with one face highlighted (everything else dimmed),
@@ -20,6 +20,9 @@ Page {
         anchors.fill: parent
         source: photoPath ? "file://" + photoPath : ""
         fillMode: Image.PreserveAspectFit
+        // Bboxes are normalized to the EXIF-oriented image, so the display
+        // must be oriented the same way or frames land off the face
+        autoTransform: true
         asynchronous: true
 
         BusyIndicator {

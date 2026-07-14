@@ -124,6 +124,75 @@ Page {
                 }
             }
 
+            // Unknown faces first: identifying them is the main action
+            // after a scan, so it must not be buried below the people list
+            SectionHeader {
+                text: qsTr("Unknown faces")
+                visible: unknownFacesCount > 0
+            }
+
+            Label {
+                x: Theme.horizontalPageMargin
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                text: unknownFacesCount === 1
+                    ? qsTr("1 face needs to be identified")
+                    : qsTr("%n faces need to be identified", "", unknownFacesCount)
+                font.pixelSize: Theme.fontSizeSmall
+                color: Theme.secondaryHighlightColor
+                wrapMode: Text.WordWrap
+                visible: unknownFacesCount > 0
+            }
+
+            // Action button to review unknown faces
+            BackgroundItem {
+                width: parent.width
+                height: Theme.itemSizeMedium
+                visible: unknownFacesCount > 0
+
+                Rectangle {
+                    width: parent.width - 2 * Theme.horizontalPageMargin
+                    height: parent.height - Theme.paddingMedium
+                    x: Theme.horizontalPageMargin
+                    y: Theme.paddingMedium / 2
+                    radius: Theme.paddingSmall
+                    color: Theme.rgba(Theme.highlightBackgroundColor, parent.parent.highlighted ? 0.3 : 0.15)
+                    border.color: Theme.rgba(Theme.highlightColor, 0.3)
+                    border.width: 1
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: Theme.paddingMedium
+
+                        Image {
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: "image://theme/icon-m-person"
+                            width: Theme.iconSizeMedium
+                            height: Theme.iconSizeMedium
+                        }
+
+                        Label {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: qsTr("Review unknown faces")
+                            color: Theme.highlightColor
+                            font.pixelSize: Theme.fontSizeMedium
+                        }
+                    }
+                }
+
+                onClicked: {
+                    pageStack.push(Qt.resolvedUrl("UnknownFacesPage.qml"))
+                }
+            }
+
+            // Separator between the two sections
+            Rectangle {
+                width: parent.width - 2 * Theme.horizontalPageMargin
+                height: 1
+                x: Theme.horizontalPageMargin
+                color: Theme.rgba(Theme.highlightColor, 0.1)
+                visible: unknownFacesCount > 0 && peopleModel.count > 0
+            }
+
             // Auto-matched faces section
             SectionHeader {
                 text: qsTr("Recognized people")
@@ -133,7 +202,9 @@ Page {
             Label {
                 x: Theme.horizontalPageMargin
                 width: parent.width - 2 * Theme.horizontalPageMargin
-                text: qsTr("These faces were automatically matched to people you've already identified:")
+                text: unknownFacesCount === 0
+                    ? qsTr("All photos were automatically attached to these people:")
+                    : qsTr("These faces were automatically matched to people you've already identified:")
                 font.pixelSize: Theme.fontSizeSmall
                 color: Theme.secondaryHighlightColor
                 wrapMode: Text.WordWrap
@@ -212,74 +283,6 @@ Page {
                 enabled: peopleModel.count === 0 && unknownFacesCount === 0
                 text: qsTr("No faces detected")
                 hintText: qsTr("No faces were found in your photos")
-            }
-
-            // Separator
-            Rectangle {
-                width: parent.width - 2 * Theme.horizontalPageMargin
-                height: 1
-                x: Theme.horizontalPageMargin
-                color: Theme.rgba(Theme.highlightColor, 0.1)
-                visible: unknownFacesCount > 0
-            }
-
-            // Unknown faces section
-            SectionHeader {
-                text: qsTr("Unknown faces")
-                visible: unknownFacesCount > 0
-            }
-
-            Label {
-                x: Theme.horizontalPageMargin
-                width: parent.width - 2 * Theme.horizontalPageMargin
-                text: unknownFacesCount === 1
-                    ? qsTr("1 face needs to be identified")
-                    : qsTr("%n faces need to be identified", "", unknownFacesCount)
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.secondaryHighlightColor
-                wrapMode: Text.WordWrap
-                visible: unknownFacesCount > 0
-            }
-
-            // Action button to review unknown faces
-            BackgroundItem {
-                width: parent.width
-                height: Theme.itemSizeMedium
-                visible: unknownFacesCount > 0
-
-                Rectangle {
-                    width: parent.width - 2 * Theme.horizontalPageMargin
-                    height: parent.height - Theme.paddingMedium
-                    x: Theme.horizontalPageMargin
-                    y: Theme.paddingMedium / 2
-                    radius: Theme.paddingSmall
-                    color: Theme.rgba(Theme.highlightBackgroundColor, parent.parent.highlighted ? 0.3 : 0.15)
-                    border.color: Theme.rgba(Theme.highlightColor, 0.3)
-                    border.width: 1
-
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: Theme.paddingMedium
-
-                        Image {
-                            anchors.verticalCenter: parent.verticalCenter
-                            source: "image://theme/icon-m-person"
-                            width: Theme.iconSizeMedium
-                            height: Theme.iconSizeMedium
-                        }
-
-                        Label {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: qsTr("Review unknown faces")
-                            color: Theme.highlightColor
-                            font.pixelSize: Theme.fontSizeMedium
-                        }
-                    }
-                }
-
-                onClicked: {
-                    pageStack.push(Qt.resolvedUrl("UnknownFacesPage.qml"))
-                }
             }
 
             // Spacer

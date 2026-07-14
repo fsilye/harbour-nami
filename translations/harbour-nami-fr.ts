@@ -4,6 +4,38 @@
 <context>
     <name>AboutPage</name>
     <message>
+        <source>100% on-device processing, no internet required</source>
+        <translation>Traitement 100 % local, aucune connexion requise</translation>
+    </message>
+    <message>
+        <source>Automatic face detection and recognition</source>
+        <translation>Détection et reconnaissance automatiques des visages</translation>
+    </message>
+    <message>
+        <source>People gallery in list or grid layout</source>
+        <translation>Galerie des personnes en liste ou en grille</translation>
+    </message>
+    <message>
+        <source>Link people to your device contacts</source>
+        <translation>Association des personnes à vos contacts</translation>
+    </message>
+    <message>
+        <source>Events grouped by day</source>
+        <translation>Événements regroupés par jour</translation>
+    </message>
+    <message>
+        <source>Memories from previous years</source>
+        <translation>Souvenirs des années précédentes</translation>
+    </message>
+    <message>
+        <source>Scan folders of your choice, SD card included</source>
+        <translation>Analyse des dossiers de votre choix, carte SD incluse</translation>
+    </message>
+    <message>
+        <source>Data export and full deletion (GDPR)</source>
+        <translation>Export des données et suppression totale (RGPD)</translation>
+    </message>
+    <message>
         <source>100% on-device processing</source>
         <translation>Traitement 100 % sur l'appareil</translation>
     </message>
@@ -105,6 +137,36 @@
     </message>
 </context>
 <context>
+    <name>DayPhotosPage</name>
+    <message>
+        <source>photo</source>
+        <translation>photo</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>photos</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Aucune photo</translation>
+    </message>
+</context>
+<context>
+    <name>MemoryDetailPage</name>
+    <message>
+        <source>photo</source>
+        <translation>photo</translation>
+    </message>
+    <message>
+        <source>photos</source>
+        <translation>photos</translation>
+    </message>
+    <message>
+        <source>No photos</source>
+        <translation>Aucune photo</translation>
+    </message>
+</context>
+<context>
     <name>EventsPage</name>
     <message>
         <source>Events</source>
@@ -140,6 +202,14 @@
 </context>
 <context>
     <name>IdentifyFaceDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Ou créer une personne uniquement dans l'app :</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Annuler</translation>
@@ -228,6 +298,30 @@
 </context>
 <context>
     <name>MainPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>Fusionner les doublons ?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 est déjà associé à ce contact. Fusionner %2 dans %1 ?</translation>
+    </message>
+    <message>
+        <source>Deleting %1</source>
+        <translation>Suppression de %1</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Changer le contact associé</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Dissocier le contact</translation>
+    </message>
     <message>
         <source>About</source>
         <translation>À propos</translation>
@@ -352,6 +446,10 @@
 <context>
     <name>MemoriesPage</name>
     <message>
+        <source>Photos from around this time in previous years</source>
+        <translation>Photos de cette période les années précédentes</translation>
+    </message>
+    <message>
         <source> year ago</source>
         <translation> an auparavant</translation>
     </message>
@@ -453,6 +551,30 @@
 </context>
 <context>
     <name>PersonDetailPage</name>
+    <message>
+        <source>Merge duplicates?</source>
+        <translation>Fusionner les doublons ?</translation>
+    </message>
+    <message>
+        <source>%1 is already linked to this contact. Merge %2 into %1?</source>
+        <translation>%1 est déjà associé à ce contact. Fusionner %2 dans %1 ?</translation>
+    </message>
+    <message>
+        <source>Open in Contacts</source>
+        <translation>Ouvrir dans Contacts</translation>
+    </message>
+    <message>
+        <source>Link to contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Change linked contact</source>
+        <translation>Changer le contact associé</translation>
+    </message>
+    <message>
+        <source>Unlink contact</source>
+        <translation>Dissocier le contact</translation>
+    </message>
     <message>
         <source>Confirm all matches</source>
         <translation>Confirmer toutes les correspondances</translation>
@@ -581,6 +703,10 @@
 </context>
 <context>
     <name>ScanResultsPage</name>
+    <message>
+        <source>All photos were automatically attached to these people:</source>
+        <translation>Toutes les photos ont été automatiquement rattachées à ces personnes :</translation>
+    </message>
     <message numerus="yes">
         <source>%n faces need to be identified</source>
         <translation>
@@ -688,7 +814,54 @@
     </message>
 </context>
 <context>
+    <name>SelectContactDialog</name>
+    <message>
+        <source>Your address book appears to be empty</source>
+        <translation>Votre carnet d'adresses semble vide</translation>
+    </message>
+    <message>
+        <source>Link</source>
+        <translation>Associer</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <source>Link %1 to a contact</source>
+        <translation>Associer %1 à un contact</translation>
+    </message>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Search contacts</source>
+        <translation>Rechercher des contacts</translation>
+    </message>
+    <message>
+        <source>Unnamed contact</source>
+        <translation>Contact sans nom</translation>
+    </message>
+    <message>
+        <source>No contacts</source>
+        <translation>Aucun contact</translation>
+    </message>
+    <message>
+        <source>No contact matches your search</source>
+        <translation>Aucun contact ne correspond à votre recherche</translation>
+    </message>
+</context>
+<context>
     <name>SelectPersonDialog</name>
+    <message>
+        <source>Link to a contact</source>
+        <translation>Associer à un contact</translation>
+    </message>
+    <message>
+        <source>Or create a person only in the app:</source>
+        <translation>Ou créer une personne uniquement dans l'app :</translation>
+    </message>
     <message>
         <source>Cancel</source>
         <translation>Annuler</translation>
@@ -728,6 +901,66 @@
 </context>
 <context>
     <name>SettingsPage</name>
+    <message>
+        <source>Memories time window</source>
+        <translation>Fenêtre des souvenirs</translation>
+    </message>
+    <message>
+        <source>days</source>
+        <translation>jours</translation>
+    </message>
+    <message>
+        <source>Memories show photos taken within this many days around today's date in previous years</source>
+        <translation>Les souvenirs affichent les photos prises à ce nombre de jours autour de la date du jour les années précédentes</translation>
+    </message>
+    <message>
+        <source>Contacts integration</source>
+        <translation>Intégration des contacts</translation>
+    </message>
+    <message>
+        <source>Let you link people to your device contacts. When off, Nami never reads your contacts, even though the permission is granted.</source>
+        <translation>Permet de lier des personnes à tes contacts. Désactivé, Nami ne lit jamais tes contacts, même si la permission est accordée.</translation>
+    </message>
+    <message>
+        <source>Grid ×2</source>
+        <translation>Grille ×2</translation>
+    </message>
+    <message>
+        <source>Grid ×4</source>
+        <translation>Grille ×4</translation>
+    </message>
+    <message>
+        <source>Scanned folders</source>
+        <translation>Dossiers analysés</translation>
+    </message>
+    <message>
+        <source>Nami only scans the folders listed here. Add a folder on the SD card to include external photos.</source>
+        <translation>Nami n'analyse que les dossiers listés ici. Ajoutez un dossier sur la carte SD pour inclure les photos externes.</translation>
+    </message>
+    <message>
+        <source>Add folder</source>
+        <translation>Ajouter un dossier</translation>
+    </message>
+    <message>
+        <source>Display</source>
+        <translation>Affichage</translation>
+    </message>
+    <message>
+        <source>People layout</source>
+        <translation>Disposition des personnes</translation>
+    </message>
+    <message>
+        <source>List</source>
+        <translation>Liste</translation>
+    </message>
+    <message>
+        <source>Grid</source>
+        <translation>Grille</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Retirer</translation>
+    </message>
     <message>
         <source>All face recognition processing happens locally on your device. No data is sent to external servers.</source>
         <translation>Tout le traitement de reconnaissance faciale s'effectue localement sur votre appareil. Aucune donnée n'est envoyée vers des serveurs externes.</translation>

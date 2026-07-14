@@ -6,17 +6,12 @@ Dialog {
 
     property int personId
     property string currentName
-
-    property var faceManager: appWindow.faceRecognition
+    // Result read by the caller on accepted
+    property string newName: ""
 
     canAccept: nameField.text.trim().length > 0
 
-    onAccepted: {
-        var newName = nameField.text.trim()
-        if (newName !== currentName) {
-            faceManager.updatePerson(personId, newName, null)
-        }
-    }
+    onAccepted: newName = nameField.text.trim()
 
     SilicaFlickable {
         anchors.fill: parent
@@ -47,6 +42,7 @@ Dialog {
                 label: qsTr("Name")
                 placeholderText: qsTr("Enter person name")
                 text: currentName
+                focus: true
 
                 EnterKey.enabled: text.trim().length > 0
                 EnterKey.iconSource: "image://theme/icon-m-enter-accept"

@@ -22,6 +22,7 @@ FacePipeline::FacePipeline(QObject *parent)
     , m_processing(false)
     , m_cancelRequested(false)
     , m_needsRescan(false)
+    , m_contactsEnabled(true)
     , m_currentScanIsForced(false)
     , m_totalPhotos(0)
     , m_processedPhotos(0)
@@ -74,6 +75,10 @@ bool FacePipeline::initialize(const QString &detectorModelPath,
         return false;
     }
 
+    // Privacy switch for contact reading (defaults to enabled)
+    m_contactsEnabled = m_database->getSetting("contacts_enabled", "true") != "false";
+    emit contactsEnabledChanged();
+
     // User-tuned matching threshold
     bool thresholdOk = false;
     float storedThreshold = m_database->getSetting("auto_match_threshold").toFloat(&thresholdOk);
@@ -101,6 +106,11 @@ bool FacePipeline::initialize(const QString &detectorModelPath,
 
 void FacePipeline::scanGallery(const QString &galleryPath, bool recursive, bool forceRescan)
 {
+    scanGalleries(QStringList{galleryPath}, recursive, forceRescan);
+}
+
+void FacePipeline::scanGalleries(const QStringList &galleryPaths, bool recursive, bool forceRescan)
+{
     if (!m_initialized) {
         emit error("Pipeline not initialized");
         return;
@@ -125,11 +135,26 @@ void FacePipeline::scanGallery(const QString &galleryPath, bool recursive, bool 
     m_currentScanIsForced = forceRescan;
     emit processingChanged();
 
-    qCDebug(lcNami) << "Scanning gallery:" << galleryPath << "(recursive:" << recursive
+    qCDebug(lcNami) << "Scanning galleries:" << galleryPaths << "(recursive:" << recursive
              << "force:" << forceRescan << ")";
 
-    // Find all image files
-    m_pendingFiles = findImageFiles(galleryPath, recursive);
+    // Find all image files across every folder, deduplicated (folders may
+    // overlap, e.g. an SD card mounted under a scanned parent)
+    QStringList allFiles;
+    QSet<QString> seen;
+    for (const QString &path : galleryPaths) {
+        if (path.isEmpty()) {
+            continue;
+        }
+        const QStringList files = findImageFiles(path, recursive);
+        for (const QString &file : files) {
+            if (!seen.contains(file)) {
+                seen.insert(file);
+                allFiles.append(file);
+            }
+        }
+    }
+    m_pendingFiles = allFiles;
 
     // Incremental scan: skip photos already processed
     if (!forceRescan) {
@@ -415,7 +440,7 @@ int FacePipeline::groupUnknownFaces(float similarityThreshold)
     return groupsCreated;
 }
 
-bool FacePipeline::identifyFace(int faceId, int personId, const QString &personName)
+bool FacePipeline::identifyFace(int faceId, int personId, const QString &personName, const QString &contactId)
 {
     if (!m_initialized) {
         emit error("Pipeline not initialized");
@@ -428,6 +453,10 @@ bool FacePipeline::identifyFace(int faceId, int personId, const QString &personN
         if (personId < 0) {
             emit error("Failed to create person");
             return false;
+        }
+        // Optionally link the freshly created person to a device contact
+        if (!contactId.isEmpty()) {
+            m_database->setPersonContact(personId, contactId);
         }
     }
 
@@ -604,6 +633,7 @@ QVariantList FacePipeline::getAllPeople()
         personMap["name"] = person.name;
         personMap["photo_count"] = person.photoCount;
         personMap["created_at"] = person.createdAt;
+        personMap["contact_id"] = person.contactId;
         result.append(personMap);
     }
 
@@ -644,6 +674,7 @@ QVariantList FacePipeline::getPersonPhotos(int personId)
                 ? photo.dateTaken.toMSecsSinceEpoch() / 1000 : 0;
             photoMap["similarity_score"] = face.similarityScore;
             photoMap["verified"] = face.verified;
+            photoMap["rotation"] = photo.rotation;
             photoMap["bbox_x"] = face.bbox.x();
             photoMap["bbox_y"] = face.bbox.y();
             photoMap["bbox_width"] = face.bbox.width();
@@ -702,6 +733,55 @@ bool FacePipeline::updatePersonName(int personId, const QString &name)
     return m_database->updatePersonName(personId, name);
 }
 
+bool FacePipeline::linkPersonToContact(int personId, const QString &contactId)
+{
+    if (!m_initialized || !m_database) {
+        return false;
+    }
+
+    return m_database->setPersonContact(personId, contactId);
+}
+
+QString FacePipeline::personContactId(int personId)
+{
+    if (!m_initialized || !m_database) {
+        return QString();
+    }
+
+    return m_database->getPerson(personId).contactId;
+}
+
+int FacePipeline::photoRotation(const QString &photoPath)
+{
+    if (!m_initialized || !m_database) {
+        return 0;
+    }
+
+    return m_database->photoRotation(photoPath);
+}
+
+bool FacePipeline::setPhotoRotation(const QString &photoPath, int rotation)
+{
+    if (!m_initialized || !m_database) {
+        return false;
+    }
+
+    return m_database->setPhotoRotation(photoPath, rotation);
+}
+
+void FacePipeline::setContactsEnabled(bool enabled)
+{
+    if (m_contactsEnabled == enabled) {
+        return;
+    }
+
+    m_contactsEnabled = enabled;
+    if (m_database) {
+        m_database->setSetting("contacts_enabled", enabled ? "true" : "false");
+    }
+    emit contactsEnabledChanged();
+}
+
 bool FacePipeline::mergePersons(int fromPersonId, int intoPersonId)
 {
     if (!m_initialized || !m_database) {
@@ -731,6 +811,16 @@ bool FacePipeline::removeFaceFromPerson(int faceId)
 
     invalidatePersonPrototypes();
     return m_database->removeFaceFromPerson(faceId);
+}
+
+bool FacePipeline::removePersonFromPhoto(int personId, int photoId)
+{
+    if (!m_initialized || !m_database) {
+        return false;
+    }
+
+    invalidatePersonPrototypes();
+    return m_database->removePersonFromPhoto(personId, photoId);
 }
 
 bool FacePipeline::ignoreFace(int faceId)

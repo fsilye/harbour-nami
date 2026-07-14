@@ -20,6 +20,7 @@ struct Photo {
     int width;
     int height;
     QDateTime processedAt;
+    int rotation;  // user-applied rotation in degrees (0/90/180/270)
 };
 
 /**
@@ -30,6 +31,7 @@ struct Person {
     QString name;
     QDateTime createdAt;
     int photoCount;
+    QString contactId;  // linked device contact id, empty when unlinked
 };
 
 /**
@@ -112,6 +114,16 @@ public:
      */
     bool markPhotoProcessed(int photoId);
 
+    /**
+     * @brief User-applied rotation for a photo (degrees, 0 when none)
+     */
+    int photoRotation(const QString &filePath);
+
+    /**
+     * @brief Persist a user-applied rotation for a photo
+     */
+    bool setPhotoRotation(const QString &filePath, int rotation);
+
     // === Face operations ===
 
     /**
@@ -151,6 +163,15 @@ public:
      * @brief Remove face from person (set person_id to -1)
      */
     bool removeFaceFromPerson(int faceId);
+
+    /**
+     * @brief Unassign every face of a person within a single photo
+     *
+     * A photo may contain several faces mapped to the same person; removing
+     * only the best one leaves the photo attached. This clears them all and
+     * records a rejection for each so auto-matching won't reassign them.
+     */
+    bool removePersonFromPhoto(int personId, int photoId);
 
     /**
      * @brief Mark face as ignored (not a face / not worth identifying)
@@ -199,6 +220,11 @@ public:
      * @brief Update person name
      */
     bool updatePersonName(int personId, const QString &name);
+
+    /**
+     * @brief Link a person to a device contact (empty id unlinks)
+     */
+    bool setPersonContact(int personId, const QString &contactId);
 
     /**
      * @brief Delete person and unmap their faces
